@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --cursor-bg: #0D0D0D;
+  --cursor-surface: #161616;
+  --cursor-surface-hover: #1A1A1A;
+  --cursor-border: rgba(255, 255, 255, 0.08);
+  --cursor-text-primary: #FFFFFF;
+  --cursor-text-secondary: #8B8B8B;
+  --cursor-accent: #6366f1;
+  --cursor-accent-hover: #4f46e5;
+  --cursor-grid-gap: 24px;
+}
+
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--cursor-bg);
+  color: var(--cursor-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: var(--cursor-bg);
+}
+
+/* Cursor.com style grid system */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--cursor-grid-gap);
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 768px) {
+  .grid-container {
+    padding: 0 32px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .grid-container {
+    padding: 0 48px;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbar styling like cursor.com */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cursor-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}

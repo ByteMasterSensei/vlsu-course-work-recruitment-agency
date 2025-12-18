@@ -1,0 +1,61 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: recruitment_agency_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: RecruitmentAgencyDB
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - recruitment_agency_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: recruitment_agency_backend
+    ports:
+      - "5000:80"
+      - "5001:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_SERVER=mysql
+      - DB_DATABASE=RecruitmentAgencyDB
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
+      - DB_PORT=3306
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=RecruitmentAgencyDB;User=appuser;Password=apppassword;Port=3306;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - recruitment_agency_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: recruitment_agency_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - recruitment_agency_network
+
+volumes:
+  mysql_data:
+
+networks:
+  recruitment_agency_network:
+    driver: bridge
