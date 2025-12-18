@@ -1,20 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RecruitmentAgency.API.DTOs.Auth;
 using RecruitmentAgency.API.Services;
-
 namespace RecruitmentAgency.API.Controllers;
-
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
     public AuthController(IAuthService authService)
     {
         _authService = authService;
     }
-
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto registerDto)
     {
@@ -28,7 +24,6 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
-
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
     {
@@ -42,7 +37,6 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
-
     [HttpPost("refresh")]
     public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
     {
@@ -57,9 +51,7 @@ public class AuthController : ControllerBase
         }
     }
 }
-
 public class RefreshTokenDto
 {
     public string RefreshToken { get; set; } = string.Empty;
 }
-

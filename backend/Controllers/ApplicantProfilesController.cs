@@ -1,23 +1,21 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecruitmentAgency.API.DTOs.ApplicantProfile;
 using RecruitmentAgency.API.Services;
 using System.Security.Claims;
-
 namespace RecruitmentAgency.API.Controllers;
-
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/applicant-profiles")]
 [Authorize]
 public class ApplicantProfilesController : ControllerBase
 {
     private readonly IApplicantProfileService _profileService;
-
-    public ApplicantProfilesController(IApplicantProfileService profileService)
+    private readonly IAccessRightService _accessRightService;
+    public ApplicantProfilesController(IApplicantProfileService profileService, IAccessRightService accessRightService)
     {
         _profileService = profileService;
+        _accessRightService = accessRightService;
     }
-
     [HttpGet("my")]
     public async Task<ActionResult<List<ApplicantProfileDto>>> GetMyProfiles()
     {
@@ -25,16 +23,24 @@ public class ApplicantProfilesController : ControllerBase
         var profiles = await _profileService.GetMyProfilesAsync(userId);
         return Ok(profiles);
     }
-
     [HttpGet]
-    [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<List<ApplicantProfileDto>>> GetAllProfiles()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
-        var profiles = await _profileService.GetAllProfilesAsync(userId);
-        return Ok(profiles);
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        if (userRole == "Manager" || userRole == "Admin")
+        {
+            var profiles = await _profileService.GetAllProfilesAsync(userId);
+            return Ok(profiles);
+        }
+        var hasAccess = await _accessRightService.CheckAccessAsync(userId);
+        if (!hasAccess)
+        {
+            return Forbid();
+        }
+        var allProfiles = await _profileService.GetAllProfilesAsync(userId);
+        return Ok(allProfiles);
     }
-
     [HttpGet("{id}")]
     public async Task<ActionResult<ApplicantProfileDto>> GetProfile(int id)
     {
@@ -46,7 +52,6 @@ public class ApplicantProfilesController : ControllerBase
         }
         return Ok(profile);
     }
-
     [HttpPost]
     public async Task<ActionResult<ApplicantProfileDto>> CreateProfile([FromBody] CreateApplicantProfileDto dto)
     {
@@ -54,7 +59,6 @@ public class ApplicantProfilesController : ControllerBase
         var profile = await _profileService.CreateProfileAsync(dto, userId);
         return CreatedAtAction(nameof(GetProfile), new { id = profile.Id }, profile);
     }
-
     [HttpPut("{id}")]
     public async Task<ActionResult<ApplicantProfileDto>> UpdateProfile(int id, [FromBody] UpdateApplicantProfileDto dto)
     {
@@ -66,7 +70,6 @@ public class ApplicantProfilesController : ControllerBase
         }
         return Ok(profile);
     }
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProfile(int id)
     {
@@ -78,7 +81,6 @@ public class ApplicantProfilesController : ControllerBase
         }
         return NoContent();
     }
-
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDto dto)
     {
@@ -91,9 +93,7 @@ public class ApplicantProfilesController : ControllerBase
         return NoContent();
     }
 }
-
 public class UpdateStatusDto
 {
     public int Status { get; set; }
 }
-

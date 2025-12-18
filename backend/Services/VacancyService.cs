@@ -1,10 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RecruitmentAgency.API.Data;
 using RecruitmentAgency.API.DTOs.Vacancy;
 using RecruitmentAgency.API.Models;
-
 namespace RecruitmentAgency.API.Services;
-
 public interface IVacancyService
 {
     Task<VacancyListResponseDto> GetVacanciesAsync(VacancyFilterDto filter);
@@ -13,21 +11,16 @@ public interface IVacancyService
     Task<VacancyDto?> UpdateVacancyAsync(int id, UpdateVacancyDto dto, int userId);
     Task<bool> DeleteVacancyAsync(int id, int userId);
 }
-
 public class VacancyService : IVacancyService
 {
     private readonly ApplicationDbContext _context;
-
     public VacancyService(ApplicationDbContext context)
     {
         _context = context;
     }
-
     public async Task<VacancyListResponseDto> GetVacanciesAsync(VacancyFilterDto filter)
     {
         var query = _context.Vacancies.AsQueryable();
-
-        // Apply filters
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
             var searchLower = filter.Search.ToLower();
@@ -38,28 +31,22 @@ public class VacancyService : IVacancyService
                 (v.Requirements != null && v.Requirements.ToLower().Contains(searchLower))
             );
         }
-
         if (!string.IsNullOrWhiteSpace(filter.CompanyName))
         {
             query = query.Where(v => v.CompanyName.Contains(filter.CompanyName));
         }
-
         if (filter.EmploymentType.HasValue)
         {
             query = query.Where(v => v.EmploymentType == (EmploymentType)filter.EmploymentType.Value);
         }
-
         if (filter.Status.HasValue)
         {
             query = query.Where(v => v.Status == (VacancyStatus)filter.Status.Value);
         }
         else
         {
-            // By default, show only active vacancies for non-managers
             query = query.Where(v => v.Status == VacancyStatus.Active);
         }
-
-        // Apply sorting
         query = filter.SortBy?.ToLower() switch
         {
             "date" or "publishedat" => filter.SortDescending
@@ -73,10 +60,7 @@ public class VacancyService : IVacancyService
                 : query.OrderBy(v => v.CompanyName),
             _ => query.OrderByDescending(v => v.PublishedAt)
         };
-
         var totalCount = await query.CountAsync();
-
-        // Apply pagination
         var items = await query
             .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
@@ -100,7 +84,6 @@ public class VacancyService : IVacancyService
                 CreatedByUserId = v.CreatedByUserId
             })
             .ToListAsync();
-
         return new VacancyListResponseDto
         {
             Items = items,
@@ -110,12 +93,10 @@ public class VacancyService : IVacancyService
             TotalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize)
         };
     }
-
     public async Task<VacancyDto?> GetVacancyByIdAsync(int id)
     {
         var vacancy = await _context.Vacancies.FindAsync(id);
         if (vacancy == null) return null;
-
         return new VacancyDto
         {
             Id = vacancy.Id,
@@ -136,7 +117,6 @@ public class VacancyService : IVacancyService
             CreatedByUserId = vacancy.CreatedByUserId
         };
     }
-
     public async Task<VacancyDto> CreateVacancyAsync(CreateVacancyDto dto, int userId)
     {
         var vacancy = new Vacancy
@@ -158,18 +138,14 @@ public class VacancyService : IVacancyService
             CreatedByUserId = userId,
             CreatedAt = DateTime.UtcNow
         };
-
         _context.Vacancies.Add(vacancy);
         await _context.SaveChangesAsync();
-
         return await GetVacancyByIdAsync(vacancy.Id) ?? throw new InvalidOperationException("Failed to create vacancy");
     }
-
     public async Task<VacancyDto?> UpdateVacancyAsync(int id, UpdateVacancyDto dto, int userId)
     {
         var vacancy = await _context.Vacancies.FindAsync(id);
         if (vacancy == null) return null;
-
         if (!string.IsNullOrWhiteSpace(dto.Title)) vacancy.Title = dto.Title;
         if (!string.IsNullOrWhiteSpace(dto.CompanyName)) vacancy.CompanyName = dto.CompanyName;
         if (dto.CompanyINN != null) vacancy.CompanyINN = dto.CompanyINN;
@@ -183,23 +159,16 @@ public class VacancyService : IVacancyService
         if (dto.ContactEmail != null) vacancy.ContactEmail = dto.ContactEmail;
         if (dto.ContactPhone != null) vacancy.ContactPhone = dto.ContactPhone;
         if (dto.ExpiresAt.HasValue) vacancy.ExpiresAt = dto.ExpiresAt;
-
         vacancy.UpdatedAt = DateTime.UtcNow;
-
         await _context.SaveChangesAsync();
-
         return await GetVacancyByIdAsync(id);
     }
-
     public async Task<bool> DeleteVacancyAsync(int id, int userId)
     {
         var vacancy = await _context.Vacancies.FindAsync(id);
         if (vacancy == null) return false;
-
         _context.Vacancies.Remove(vacancy);
         await _context.SaveChangesAsync();
-
         return true;
     }
 }
-

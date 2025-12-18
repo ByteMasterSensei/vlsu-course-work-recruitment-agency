@@ -28,7 +28,7 @@ services:
       - "5000:80"
       - "5001:443"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - DB_SERVER=mysql
       - DB_DATABASE=RecruitmentAgencyDB
       - DB_USER=appuser
@@ -44,21 +44,14 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
-      target: development
+      dockerfile: Dockerfile
     container_name: recruitment_agency_frontend
     ports:
-      - "3000:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://localhost:5000
+      - "3000:80"
     depends_on:
       - backend
     networks:
       - recruitment_agency_network
-    command: npm run dev -- --host
 
 volumes:
   mysql_data:

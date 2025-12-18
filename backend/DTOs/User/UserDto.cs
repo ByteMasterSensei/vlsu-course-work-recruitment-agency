@@ -1,5 +1,4 @@
-namespace RecruitmentAgency.API.DTOs.User;
-
+﻿namespace RecruitmentAgency.API.DTOs.User;
 public class UserManagementDto
 {
     public int Id { get; set; }
@@ -12,7 +11,6 @@ public class UserManagementDto
     public DateTime CreatedAt { get; set; }
     public bool IsActive { get; set; }
 }
-
 public class UpdateUserDto
 {
     public string? FirstName { get; set; }
@@ -22,7 +20,6 @@ public class UpdateUserDto
     public int? Role { get; set; }
     public bool? IsActive { get; set; }
 }
-
 public class ActionLogDto
 {
     public int Id { get; set; }
@@ -35,7 +32,6 @@ public class ActionLogDto
     public string? IpAddress { get; set; }
     public DateTime CreatedAt { get; set; }
 }
-
 public class ActionLogFilterDto
 {
     public int? UserId { get; set; }
@@ -46,7 +42,6 @@ public class ActionLogFilterDto
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
 }
-
 public class ActionLogListResponseDto
 {
     public List<ActionLogDto> Items { get; set; } = new();
@@ -55,4 +50,3 @@ public class ActionLogListResponseDto
     public int PageSize { get; set; }
     public int TotalPages { get; set; }
 }
-

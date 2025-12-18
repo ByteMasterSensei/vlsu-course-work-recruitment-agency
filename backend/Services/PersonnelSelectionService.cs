@@ -1,24 +1,19 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RecruitmentAgency.API.Data;
 using RecruitmentAgency.API.DTOs.AccessRight;
 using RecruitmentAgency.API.Models;
-
 namespace RecruitmentAgency.API.Services;
-
 public interface IPersonnelSelectionService
 {
     Task<List<PersonnelSearchResultDto>> SearchPersonnelAsync(PersonnelSearchDto searchDto);
 }
-
 public class PersonnelSelectionService : IPersonnelSelectionService
 {
     private readonly ApplicationDbContext _context;
-
     public PersonnelSelectionService(ApplicationDbContext context)
     {
         _context = context;
     }
-
     public async Task<List<PersonnelSearchResultDto>> SearchPersonnelAsync(PersonnelSearchDto searchDto)
     {
         var query = _context.ApplicantProfiles
@@ -28,8 +23,6 @@ public class PersonnelSelectionService : IPersonnelSelectionService
             .Include(ap => ap.Skills)
             .Where(ap => ap.Status == ApplicantStatus.Active)
             .AsQueryable();
-
-        // If searching for specific vacancy, get vacancy requirements
         if (searchDto.VacancyId.HasValue)
         {
             var vacancy = await _context.Vacancies.FindAsync(searchDto.VacancyId.Value);
@@ -37,7 +30,6 @@ public class PersonnelSelectionService : IPersonnelSelectionService
             {
                 if (!string.IsNullOrWhiteSpace(vacancy.Requirements))
                 {
-                    // Simple keyword matching - in production, use more sophisticated matching
                     var keywords = vacancy.Requirements.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     query = query.Where(ap =>
                         (ap.DesiredPosition != null && keywords.Any(k => ap.DesiredPosition.ToLower().Contains(k))) ||
@@ -47,28 +39,23 @@ public class PersonnelSelectionService : IPersonnelSelectionService
                 }
             }
         }
-
-        // Apply filters
         if (!string.IsNullOrWhiteSpace(searchDto.DesiredPosition))
         {
             query = query.Where(ap => ap.DesiredPosition != null && 
                 ap.DesiredPosition.Contains(searchDto.DesiredPosition));
         }
-
         if (!string.IsNullOrWhiteSpace(searchDto.Education))
         {
             query = query.Where(ap => ap.Educations.Any(e => 
                 e.Specialty.Contains(searchDto.Education) || 
                 e.Institution.Contains(searchDto.Education)));
         }
-
         if (searchDto.MinExperienceYears.HasValue)
         {
             var minDate = DateTime.UtcNow.AddYears(-searchDto.MinExperienceYears.Value);
             query = query.Where(ap => ap.WorkExperiences.Any(we => 
                 we.StartDate <= minDate && (we.EndDate == null || we.EndDate >= minDate)));
         }
-
         if (searchDto.RequiredSkills != null && searchDto.RequiredSkills.Any())
         {
             foreach (var skill in searchDto.RequiredSkills)
@@ -77,15 +64,11 @@ public class PersonnelSelectionService : IPersonnelSelectionService
                     s.SkillName.Contains(skill, StringComparison.OrdinalIgnoreCase)));
             }
         }
-
         if (searchDto.ReadyToRelocate.HasValue)
         {
             query = query.Where(ap => ap.ReadyToRelocate == searchDto.ReadyToRelocate.Value);
         }
-
         var profiles = await query.ToListAsync();
-
-        // Calculate match scores and map to DTOs
         var results = profiles.Select(profile =>
         {
             var matchScore = CalculateMatchScore(profile, searchDto);
@@ -111,21 +94,17 @@ public class PersonnelSelectionService : IPersonnelSelectionService
         })
         .OrderByDescending(r => r.MatchScore)
         .ToList();
-
         return results;
     }
-
     private int CalculateMatchScore(ApplicantProfile profile, PersonnelSearchDto searchDto)
     {
         int score = 0;
-
         if (!string.IsNullOrWhiteSpace(searchDto.DesiredPosition) && 
             profile.DesiredPosition != null &&
             profile.DesiredPosition.Contains(searchDto.DesiredPosition, StringComparison.OrdinalIgnoreCase))
         {
             score += 30;
         }
-
         if (searchDto.RequiredSkills != null && searchDto.RequiredSkills.Any())
         {
             var matchedSkills = profile.Skills.Count(s => 
@@ -133,7 +112,6 @@ public class PersonnelSelectionService : IPersonnelSelectionService
                     s.SkillName.Contains(rs, StringComparison.OrdinalIgnoreCase)));
             score += matchedSkills * 20;
         }
-
         if (searchDto.MinExperienceYears.HasValue)
         {
             var totalYears = profile.WorkExperiences.Sum(we => 
@@ -143,7 +121,6 @@ public class PersonnelSelectionService : IPersonnelSelectionService
                 score += 25;
             }
         }
-
         if (!string.IsNullOrWhiteSpace(searchDto.Education) &&
             profile.Educations.Any(e => 
                 e.Specialty.Contains(searchDto.Education, StringComparison.OrdinalIgnoreCase) ||
@@ -151,14 +128,11 @@ public class PersonnelSelectionService : IPersonnelSelectionService
         {
             score += 25;
         }
-
         return score;
     }
-
     private int? CalculateYears(DateTime startDate, DateTime? endDate)
     {
         var end = endDate ?? DateTime.UtcNow;
         return (int)((end - startDate).TotalDays / 365.25);
     }
 }
-

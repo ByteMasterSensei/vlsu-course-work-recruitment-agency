@@ -1,5 +1,4 @@
-namespace RecruitmentAgency.API.DTOs.Vacancy;
-
+﻿namespace RecruitmentAgency.API.DTOs.Vacancy;
 public class VacancyDto
 {
     public int Id { get; set; }
@@ -19,7 +18,6 @@ public class VacancyDto
     public DateTime? ExpiresAt { get; set; }
     public int CreatedByUserId { get; set; }
 }
-
 public class CreateVacancyDto
 {
     public string Title { get; set; } = string.Empty;
@@ -35,7 +33,6 @@ public class CreateVacancyDto
     public string? ContactPhone { get; set; }
     public DateTime? ExpiresAt { get; set; }
 }
-
 public class UpdateVacancyDto
 {
     public string? Title { get; set; }
@@ -52,7 +49,6 @@ public class UpdateVacancyDto
     public string? ContactPhone { get; set; }
     public DateTime? ExpiresAt { get; set; }
 }
-
 public class VacancyFilterDto
 {
     public string? Search { get; set; }
@@ -64,7 +60,6 @@ public class VacancyFilterDto
     public string? SortBy { get; set; }
     public bool SortDescending { get; set; } = false;
 }
-
 public class VacancyListResponseDto
 {
     public List<VacancyDto> Items { get; set; } = new();
@@ -73,4 +68,3 @@ public class VacancyListResponseDto
     public int PageSize { get; set; }
     public int TotalPages { get; set; }
 }
-

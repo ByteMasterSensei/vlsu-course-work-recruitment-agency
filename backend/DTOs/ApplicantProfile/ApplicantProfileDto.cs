@@ -1,5 +1,4 @@
-namespace RecruitmentAgency.API.DTOs.ApplicantProfile;
-
+﻿namespace RecruitmentAgency.API.DTOs.ApplicantProfile;
 public class ApplicantProfileDto
 {
     public int Id { get; set; }
@@ -16,7 +15,6 @@ public class ApplicantProfileDto
     public List<WorkExperienceDto> WorkExperiences { get; set; } = new();
     public List<ApplicantSkillDto> Skills { get; set; } = new();
 }
-
 public class EducationDto
 {
     public int Id { get; set; }
@@ -25,7 +23,6 @@ public class EducationDto
     public string? Degree { get; set; }
     public int? GraduationYear { get; set; }
 }
-
 public class WorkExperienceDto
 {
     public int Id { get; set; }
@@ -36,14 +33,12 @@ public class WorkExperienceDto
     public DateTime? EndDate { get; set; }
     public bool IsCurrentJob { get; set; }
 }
-
 public class ApplicantSkillDto
 {
     public int Id { get; set; }
     public string SkillName { get; set; } = string.Empty;
     public string? SkillLevel { get; set; }
 }
-
 public class CreateApplicantProfileDto
 {
     public string? DesiredPosition { get; set; }
@@ -55,7 +50,6 @@ public class CreateApplicantProfileDto
     public List<CreateWorkExperienceDto> WorkExperiences { get; set; } = new();
     public List<CreateApplicantSkillDto> Skills { get; set; } = new();
 }
-
 public class CreateEducationDto
 {
     public string Institution { get; set; } = string.Empty;
@@ -63,7 +57,6 @@ public class CreateEducationDto
     public string? Degree { get; set; }
     public int? GraduationYear { get; set; }
 }
-
 public class CreateWorkExperienceDto
 {
     public string CompanyName { get; set; } = string.Empty;
@@ -73,13 +66,11 @@ public class CreateWorkExperienceDto
     public DateTime? EndDate { get; set; }
     public bool IsCurrentJob { get; set; }
 }
-
 public class CreateApplicantSkillDto
 {
     public string SkillName { get; set; } = string.Empty;
     public string? SkillLevel { get; set; }
 }
-
 public class UpdateApplicantProfileDto
 {
     public string? DesiredPosition { get; set; }
@@ -92,4 +83,3 @@ public class UpdateApplicantProfileDto
     public List<CreateWorkExperienceDto>? WorkExperiences { get; set; }
     public List<CreateApplicantSkillDto>? Skills { get; set; }
 }
-

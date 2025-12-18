@@ -1,27 +1,23 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RecruitmentAgency.API.Data;
 using RecruitmentAgency.API.DTOs.AccessRight;
 using RecruitmentAgency.API.Models;
-
 namespace RecruitmentAgency.API.Services;
-
 public interface IAccessRightService
 {
     Task<List<AccessRightDto>> GetAllAccessRightsAsync(int userId);
     Task<AccessRightDto> GrantAccessAsync(CreateAccessRightDto dto, int grantedByUserId);
     Task<bool> RevokeAccessAsync(int id, int userId);
     Task<bool> CheckAccessAsync(int userId);
+    Task<List<ApplicantForAccessDto>> GetApplicantsForAccessAsync();
 }
-
 public class AccessRightService : IAccessRightService
 {
     private readonly ApplicationDbContext _context;
-
     public AccessRightService(ApplicationDbContext context)
     {
         _context = context;
     }
-
     public async Task<List<AccessRightDto>> GetAllAccessRightsAsync(int userId)
     {
         var user = await _context.Users.FindAsync(userId);
@@ -29,7 +25,6 @@ public class AccessRightService : IAccessRightService
         {
             return new List<AccessRightDto>();
         }
-
         return await _context.AccessRights
             .Include(ar => ar.User)
             .Include(ar => ar.GrantedByUser)
@@ -49,7 +44,6 @@ public class AccessRightService : IAccessRightService
             })
             .ToListAsync();
     }
-
     public async Task<AccessRightDto> GrantAccessAsync(CreateAccessRightDto dto, int grantedByUserId)
     {
         var accessRight = new AccessRight
@@ -59,19 +53,14 @@ public class AccessRightService : IAccessRightService
             AccessType = (AccessType)dto.AccessType,
             CreatedAt = DateTime.UtcNow
         };
-
-        if (dto.AccessType == (int)AccessType.Temporary && dto.Days.HasValue)
+        if (dto.AccessType == (int)AccessType.Temporary && dto.DaysValid.HasValue)
         {
-            accessRight.ExpiresAt = DateTime.UtcNow.AddDays(dto.Days.Value);
+            accessRight.ExpiresAt = DateTime.UtcNow.AddDays(dto.DaysValid.Value);
         }
-
         _context.AccessRights.Add(accessRight);
         await _context.SaveChangesAsync();
-
-        // Log action
         await LogActionAsync(grantedByUserId, ActionType.GrantAccess, "AccessRight", accessRight.Id, 
             $"Предоставлен доступ пользователю {dto.UserId}");
-
         var result = await _context.AccessRights
             .Include(ar => ar.User)
             .Include(ar => ar.GrantedByUser)
@@ -91,49 +80,53 @@ public class AccessRightService : IAccessRightService
                 CreatedAt = ar.CreatedAt
             })
             .FirstAsync();
-
         return result;
     }
-
     public async Task<bool> RevokeAccessAsync(int id, int userId)
     {
         var accessRight = await _context.AccessRights.FindAsync(id);
         if (accessRight == null) return false;
-
         var user = await _context.Users.FindAsync(userId);
         if (user == null || (user.Role != UserRole.Manager && user.Role != UserRole.Admin))
         {
             return false;
         }
-
         _context.AccessRights.Remove(accessRight);
         await _context.SaveChangesAsync();
-
         await LogActionAsync(userId, ActionType.RevokeAccess, "AccessRight", id, "Доступ отозван");
-
         return true;
     }
-
     public async Task<bool> CheckAccessAsync(int userId)
     {
         var activeAccess = await _context.AccessRights
             .Where(ar => ar.UserId == userId)
-            .Where(ar => !ar.IsUsed || (ar.ExpiresAt.HasValue && ar.ExpiresAt > DateTime.UtcNow))
+            .Where(ar => 
+                (ar.AccessType == AccessType.OneTime && !ar.IsUsed) ||
+                (ar.AccessType == AccessType.Temporary && ar.ExpiresAt.HasValue && ar.ExpiresAt > DateTime.UtcNow))
             .FirstOrDefaultAsync();
-
         if (activeAccess == null) return false;
-
-        // Mark as used if it's one-time access
         if (activeAccess.AccessType == AccessType.OneTime && !activeAccess.IsUsed)
         {
             activeAccess.IsUsed = true;
             activeAccess.UsedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
-
         return true;
     }
-
+    public async Task<List<ApplicantForAccessDto>> GetApplicantsForAccessAsync()
+    {
+        return await _context.Users
+            .Where(u => u.Role == UserRole.Applicant && u.IsActive)
+            .Select(u => new ApplicantForAccessDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                MiddleName = u.MiddleName
+            })
+            .ToListAsync();
+    }
     private async Task LogActionAsync(int userId, ActionType actionType, string? entityType, int? entityId, string description)
     {
         var actionLog = new ActionLog
@@ -145,9 +138,7 @@ public class AccessRightService : IAccessRightService
             Description = description,
             CreatedAt = DateTime.UtcNow
         };
-
         _context.ActionLogs.Add(actionLog);
         await _context.SaveChangesAsync();
     }
 }
-

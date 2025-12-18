@@ -1,16 +1,15 @@
-import axios from 'axios';
-import { authService } from '../services/authService';
+import axios from "axios";
+import { authService } from "../services/authService";
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.DEV ? "http://localhost:5000/api" : "/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-// Request interceptor to add auth token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = authService.getAuthHeader();
@@ -24,7 +23,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token refresh
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -42,7 +40,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         authService.logout();
-        window.location.href = '/login';
+        window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
@@ -52,4 +50,3 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
-

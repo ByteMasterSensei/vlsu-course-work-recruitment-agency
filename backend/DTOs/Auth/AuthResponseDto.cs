@@ -1,5 +1,4 @@
-namespace RecruitmentAgency.API.DTOs.Auth;
-
+﻿namespace RecruitmentAgency.API.DTOs.Auth;
 public class AuthResponseDto
 {
     public string AccessToken { get; set; } = string.Empty;
@@ -7,7 +6,6 @@ public class AuthResponseDto
     public DateTime ExpiresAt { get; set; }
     public UserDto User { get; set; } = null!;
 }
-
 public class UserDto
 {
     public int Id { get; set; }
@@ -18,4 +16,3 @@ public class UserDto
     public string? Phone { get; set; }
     public string Role { get; set; } = string.Empty;
 }
-

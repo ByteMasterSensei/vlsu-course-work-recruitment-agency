@@ -1,8 +1,6 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
-
 namespace RecruitmentAgency.API.Helpers;
-
 public static class PasswordHasher
 {
     public static string HashPassword(string password)
@@ -11,11 +9,9 @@ public static class PasswordHasher
         var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
         return Convert.ToBase64String(hashedBytes);
     }
-
     public static bool VerifyPassword(string password, string hashedPassword)
     {
         var hashOfInput = HashPassword(password);
         return hashOfInput == hashedPassword;
     }
 }
-

@@ -1,10 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RecruitmentAgency.API.Data;
 using RecruitmentAgency.API.DTOs.ApplicantProfile;
 using RecruitmentAgency.API.Models;
-
 namespace RecruitmentAgency.API.Services;
-
 public interface IApplicantProfileService
 {
     Task<List<ApplicantProfileDto>> GetMyProfilesAsync(int userId);
@@ -15,16 +13,13 @@ public interface IApplicantProfileService
     Task<bool> DeleteProfileAsync(int id, int userId);
     Task<bool> UpdateProfileStatusAsync(int id, int status, int userId);
 }
-
 public class ApplicantProfileService : IApplicantProfileService
 {
     private readonly ApplicationDbContext _context;
-
     public ApplicantProfileService(ApplicationDbContext context)
     {
         _context = context;
     }
-
     public async Task<List<ApplicantProfileDto>> GetMyProfilesAsync(int userId)
     {
         return await _context.ApplicantProfiles
@@ -35,7 +30,6 @@ public class ApplicantProfileService : IApplicantProfileService
             .Select(ap => MapToDto(ap))
             .ToListAsync();
     }
-
     public async Task<ApplicantProfileDto?> GetProfileByIdAsync(int id, int userId)
     {
         var profile = await _context.ApplicantProfiles
@@ -43,41 +37,25 @@ public class ApplicantProfileService : IApplicantProfileService
             .Include(ap => ap.WorkExperiences)
             .Include(ap => ap.Skills)
             .FirstOrDefaultAsync(ap => ap.Id == id);
-
         if (profile == null) return null;
-
-        // Check access: user can only view their own profiles unless they are manager/admin
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return null;
-
         if (profile.UserId != userId && user.Role != UserRole.Manager && user.Role != UserRole.Admin)
         {
             return null;
         }
-
         return MapToDto(profile);
     }
-
     public async Task<List<ApplicantProfileDto>> GetAllProfilesAsync(int? userId = null)
     {
         var query = _context.ApplicantProfiles
             .Include(ap => ap.Educations)
             .Include(ap => ap.WorkExperiences)
             .Include(ap => ap.Skills)
+            .Where(ap => ap.Status == ApplicantStatus.Active)
             .AsQueryable();
-
-        if (userId.HasValue)
-        {
-            var user = await _context.Users.FindAsync(userId.Value);
-            if (user == null || (user.Role != UserRole.Manager && user.Role != UserRole.Admin))
-            {
-                return new List<ApplicantProfileDto>();
-            }
-        }
-
         return await query.Select(ap => MapToDto(ap)).ToListAsync();
     }
-
     public async Task<ApplicantProfileDto> CreateProfileAsync(CreateApplicantProfileDto dto, int userId)
     {
         var profile = new ApplicantProfile
@@ -91,11 +69,8 @@ public class ApplicantProfileService : IApplicantProfileService
             Status = ApplicantStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
-
         _context.ApplicantProfiles.Add(profile);
         await _context.SaveChangesAsync();
-
-        // Add educations
         foreach (var eduDto in dto.Educations)
         {
             var education = new Education
@@ -109,8 +84,6 @@ public class ApplicantProfileService : IApplicantProfileService
             };
             _context.Educations.Add(education);
         }
-
-        // Add work experiences
         foreach (var expDto in dto.WorkExperiences)
         {
             var experience = new WorkExperience
@@ -126,8 +99,6 @@ public class ApplicantProfileService : IApplicantProfileService
             };
             _context.WorkExperiences.Add(experience);
         }
-
-        // Add skills
         foreach (var skillDto in dto.Skills)
         {
             var skill = new ApplicantSkill
@@ -139,12 +110,9 @@ public class ApplicantProfileService : IApplicantProfileService
             };
             _context.ApplicantSkills.Add(skill);
         }
-
         await _context.SaveChangesAsync();
-
         return await GetProfileByIdAsync(profile.Id, userId) ?? throw new InvalidOperationException("Failed to create profile");
     }
-
     public async Task<ApplicantProfileDto?> UpdateProfileAsync(int id, UpdateApplicantProfileDto dto, int userId)
     {
         var profile = await _context.ApplicantProfiles
@@ -152,29 +120,20 @@ public class ApplicantProfileService : IApplicantProfileService
             .Include(ap => ap.WorkExperiences)
             .Include(ap => ap.Skills)
             .FirstOrDefaultAsync(ap => ap.Id == id);
-
         if (profile == null) return null;
-
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return null;
-
-        // Check access
         if (profile.UserId != userId && user.Role != UserRole.Manager && user.Role != UserRole.Admin)
         {
             return null;
         }
-
-        // Update basic fields
         if (!string.IsNullOrWhiteSpace(dto.DesiredPosition)) profile.DesiredPosition = dto.DesiredPosition;
         if (!string.IsNullOrWhiteSpace(dto.DesiredSalary)) profile.DesiredSalary = dto.DesiredSalary;
         if (dto.AdditionalInfo != null) profile.AdditionalInfo = dto.AdditionalInfo;
         if (dto.ReadyToRelocate.HasValue) profile.ReadyToRelocate = dto.ReadyToRelocate.Value;
         if (dto.ReadyForBusinessTrips.HasValue) profile.ReadyForBusinessTrips = dto.ReadyForBusinessTrips.Value;
         if (dto.Status.HasValue) profile.Status = (ApplicantStatus)dto.Status.Value;
-
         profile.UpdatedAt = DateTime.UtcNow;
-
-        // Update collections if provided
         if (dto.Educations != null)
         {
             _context.Educations.RemoveRange(profile.Educations);
@@ -191,7 +150,6 @@ public class ApplicantProfileService : IApplicantProfileService
                 });
             }
         }
-
         if (dto.WorkExperiences != null)
         {
             _context.WorkExperiences.RemoveRange(profile.WorkExperiences);
@@ -210,7 +168,6 @@ public class ApplicantProfileService : IApplicantProfileService
                 });
             }
         }
-
         if (dto.Skills != null)
         {
             _context.ApplicantSkills.RemoveRange(profile.Skills);
@@ -225,49 +182,36 @@ public class ApplicantProfileService : IApplicantProfileService
                 });
             }
         }
-
         await _context.SaveChangesAsync();
-
         return await GetProfileByIdAsync(id, userId);
     }
-
     public async Task<bool> DeleteProfileAsync(int id, int userId)
     {
         var profile = await _context.ApplicantProfiles.FindAsync(id);
         if (profile == null) return false;
-
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return false;
-
-        // Check access
         if (profile.UserId != userId && user.Role != UserRole.Manager && user.Role != UserRole.Admin)
         {
             return false;
         }
-
         _context.ApplicantProfiles.Remove(profile);
         await _context.SaveChangesAsync();
-
         return true;
     }
-
     public async Task<bool> UpdateProfileStatusAsync(int id, int status, int userId)
     {
         var profile = await _context.ApplicantProfiles.FindAsync(id);
         if (profile == null) return false;
-
         if (profile.UserId != userId)
         {
             return false;
         }
-
         profile.Status = (ApplicantStatus)status;
         profile.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
-
         return true;
     }
-
     private static ApplicantProfileDto MapToDto(ApplicantProfile profile)
     {
         return new ApplicantProfileDto
@@ -309,4 +253,3 @@ public class ApplicantProfileService : IApplicantProfileService
         };
     }
 }
-

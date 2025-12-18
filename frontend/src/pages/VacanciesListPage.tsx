@@ -16,19 +16,24 @@ import {
   Pagination,
   Chip,
   CircularProgress,
-  AppBar,
-  Toolbar,
   InputAdornment,
 } from '@mui/material';
-import { Search } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
-import { authService } from '../services/authService';
+import { Search, WorkOutline, CalendarToday, AttachMoney } from '@mui/icons-material';
+import Navigation from '../components/Navigation';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { vacancyService } from '../services/vacancyService';
 import type { VacancyFilter } from '../services/vacancyService';
 
+const employmentTypeLabels: Record<string, string> = {
+  'FullTime': 'Полная занятость',
+  'PartTime': 'Частичная занятость',
+  'Contract': 'Контракт',
+  'Remote': 'Удалённая работа',
+  'Internship': 'Стажировка',
+};
+
 const VacanciesListPage = () => {
   const navigate = useNavigate();
-  const user = authService.getUser();
   const [filter, setFilter] = useState<VacancyFilter>({
     page: 1,
     pageSize: 10,
@@ -60,89 +65,78 @@ const VacanciesListPage = () => {
 
   if (isLoading) {
     return (
-      <Box 
-        sx={{ 
-          minHeight: '100vh', 
-          backgroundColor: '#0D0D0D',
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center' 
-        }}
-      >
-        <CircularProgress />
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Navigation />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: 'calc(100vh - 64px)',
+          }}
+        >
+          <CircularProgress sx={{ color: 'text.primary' }} />
+        </Box>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ minHeight: '100vh', backgroundColor: '#0D0D0D', p: 4 }}>
-        <Typography color="error">Ошибка при загрузке вакансий</Typography>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Navigation />
+        <Box sx={{ maxWidth: '1200px', mx: 'auto', px: { xs: 2, md: 4 }, py: 6 }}>
+          <Typography
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '1rem',
+              fontWeight: 500,
+              color: 'error.main',
+            }}
+          >
+            Ошибка при загрузке вакансий
+          </Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#0D0D0D' }}>
-      {/* Header */}
-      <AppBar position="sticky" elevation={0}>
-        <Toolbar sx={{ maxWidth: '1440px', width: '100%', mx: 'auto', px: { xs: 3, md: 6 } }}>
-          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, fontWeight: 600, textDecoration: 'none', color: 'inherit' }}>
-            Кадровое агентство
-          </Typography>
-          {user && (
-            <Button 
-              color="inherit" 
-              component={Link} 
-              to="/profiles" 
-              sx={{ mr: 2, textTransform: 'none', fontWeight: 500 }}
-            >
-              Мои анкеты
-            </Button>
-          )}
-          {user ? (
-            <Button 
-              color="inherit" 
-              onClick={() => { authService.logout(); navigate('/login'); }}
-              sx={{ textTransform: 'none', fontWeight: 500 }}
-            >
-              Выйти
-            </Button>
-          ) : (
-            <Button 
-              color="inherit" 
-              component={Link} 
-              to="/login"
-              sx={{ textTransform: 'none', fontWeight: 500 }}
-            >
-              Войти
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Navigation />
 
-      {/* Main content с сеткой как в cursor.com */}
-      <Box sx={{ maxWidth: '1440px', mx: 'auto', px: { xs: 3, md: 6 }, py: 6 }}>
-        <Typography 
-          variant="h1" 
-          sx={{ 
-            mb: 4, 
-            fontWeight: 600,
-            fontSize: { xs: '2rem', md: '2.5rem' },
-            letterSpacing: '-0.02em'
+      <Box
+        sx={{
+          maxWidth: '1200px',
+          mx: 'auto',
+          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 4, md: 6 },
+        }}
+      >
+        <Breadcrumbs />
+        <Typography
+          className="fade-in"
+          sx={{
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontSize: { xs: '1.75rem', md: '2rem' },
+            fontWeight: 700,
+            letterSpacing: '-0.03em',
+            color: 'text.primary',
+            mb: { xs: 4, md: 6 },
           }}
         >
           Каталог вакансий
         </Typography>
 
-        {/* Search and Filters - сетка как в cursor.com */}
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ 
-            display: 'grid', 
-            gridTemplateColumns: { xs: '1fr', md: '2fr 1fr 1fr' }, 
-            gap: 2,
-            mb: 3
-          }}>
+        {}
+        <Box sx={{ mb: { xs: 4, md: 6 } }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '2fr 1fr 1fr' },
+              gap: 2,
+            }}
+          >
             <TextField
               fullWidth
               placeholder="Поиск по названию, компании, описанию..."
@@ -150,15 +144,9 @@ const VacanciesListPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Button 
-                      onClick={handleSearch} 
-                      startIcon={<Search />}
-                      sx={{ textTransform: 'none' }}
-                    >
-                      Найти
-                    </Button>
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
                   </InputAdornment>
                 ),
               }}
@@ -166,15 +154,15 @@ const VacanciesListPage = () => {
             <FormControl fullWidth>
               <InputLabel>Тип занятости</InputLabel>
               <Select
-                value={filter.employmentType ?? ''}
+                value={filter.employmentType !== undefined ? String(filter.employmentType) : ''}
                 onChange={(e) => handleEmploymentTypeFilter(e.target.value ? Number(e.target.value) : undefined)}
                 label="Тип занятости"
               >
                 <MenuItem value="">Все</MenuItem>
-                <MenuItem value={0}>Полная занятость</MenuItem>
-                <MenuItem value={1}>Частичная занятость</MenuItem>
-                <MenuItem value={2}>Контракт</MenuItem>
-                <MenuItem value={3}>Стажировка</MenuItem>
+                <MenuItem value="0">Полная занятость</MenuItem>
+                <MenuItem value="1">Частичная занятость</MenuItem>
+                <MenuItem value="2">Контракт</MenuItem>
+                <MenuItem value="3">Стажировка</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -190,94 +178,222 @@ const VacanciesListPage = () => {
               </Select>
             </FormControl>
           </Box>
+          <Button
+            onClick={handleSearch}
+            startIcon={<Search />}
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              color: 'white',
+              bgcolor: 'text.primary',
+              px: 3,
+              py: 1,
+              mt: 2,
+              borderRadius: 0,
+              letterSpacing: '-0.015em',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                bgcolor: 'text.secondary',
+              },
+            }}
+          >
+            Найти вакансии
+          </Button>
         </Box>
 
-        {/* Vacancies List - сетка как в cursor.com */}
+        {}
         {data && data.items.length > 0 ? (
           <>
             <Stack spacing={2}>
-              {data.items.map((vacancy) => (
+              {data.items.map((vacancy, index) => (
                 <Card
                   key={vacancy.id}
-                  sx={{ 
+                  className="fade-in"
+                  elevation={0}
+                  sx={{
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { 
-                      transform: 'translateY(-2px)',
-                      borderColor: 'rgba(99, 102, 241, 0.4)'
-                    }
+                    bgcolor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'rgba(0, 0, 0, 0.06)',
+                    borderRadius: 0,
+                    transition: 'all 0.15s ease',
+                    animationDelay: `${index * 0.05}s`,
+                    '&:hover': {
+                      borderColor: 'rgba(0, 0, 0, 0.12)',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    },
                   }}
                   onClick={() => navigate(`/vacancies/${vacancy.id}`)}
                 >
                   <CardContent sx={{ p: 3 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography 
-                          variant="h5" 
-                          component="h2" 
-                          gutterBottom
-                          sx={{ fontWeight: 600, mb: 1 }}
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="start"
+                      mb={2}
+                      gap={2}
+                    >
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          sx={{
+                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontSize: '1.125rem',
+                            fontWeight: 600,
+                            letterSpacing: '-0.02em',
+                            color: 'text.primary',
+                            mb: 1,
+                          }}
                         >
                           {vacancy.title}
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#8B8B8B', mb: 1 }}>
-                          {vacancy.companyName}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <WorkOutline sx={{ fontSize: '1rem', color: 'text.secondary', opacity: 0.7 }} />
+                          <Typography
+                            sx={{
+                              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            {vacancy.companyName}
+                          </Typography>
+                        </Box>
                       </Box>
-                      <Chip 
-                        label={vacancy.employmentType} 
-                        sx={{ ml: 2 }}
+                      <Chip
+                        label={employmentTypeLabels[vacancy.employmentType] || vacancy.employmentType}
+                        size="small"
+                        sx={{
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          bgcolor: 'rgba(0, 0, 0, 0.06)',
+                          color: 'text.primary',
+                          borderRadius: 0,
+                        }}
                       />
                     </Box>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: '#8B8B8B',
-                        mb: 2,
-                        lineHeight: 1.6
+                    <Typography
+                      sx={{
+                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                        fontSize: '0.875rem',
+                        fontWeight: 400,
+                        color: 'text.secondary',
+                        lineHeight: 1.6,
+                        mb: 2.5,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
                       }}
                     >
                       {vacancy.description.length > 200
                         ? `${vacancy.description.substring(0, 200)}...`
                         : vacancy.description}
                     </Typography>
-                    <Box display="flex" gap={3} flexWrap="wrap">
+                    <Box
+                      display="flex"
+                      gap={3}
+                      flexWrap="wrap"
+                      sx={{
+                        pt: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'rgba(0, 0, 0, 0.06)',
+                      }}
+                    >
                       {vacancy.salaryRange && (
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {vacancy.salaryRange}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <AttachMoney sx={{ fontSize: '1.125rem', color: 'text.primary', opacity: 0.7 }} />
+                          <Typography
+                            sx={{
+                              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                              fontSize: '0.875rem',
+                              fontWeight: 600,
+                              color: 'text.primary',
+                            }}
+                          >
+                            {vacancy.salaryRange}
+                          </Typography>
+                        </Box>
                       )}
-                      <Typography variant="body2" sx={{ color: '#8B8B8B' }}>
-                        Опубликовано: {new Date(vacancy.publishedAt).toLocaleDateString('ru-RU')}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <CalendarToday sx={{ fontSize: '0.875rem', color: 'text.disabled' }} />
+                        <Typography
+                          sx={{
+                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
+                            color: 'text.disabled',
+                          }}
+                        >
+                          {new Date(vacancy.publishedAt).toLocaleDateString('ru-RU')}
+                        </Typography>
+                      </Box>
                     </Box>
                   </CardContent>
                 </Card>
               ))}
             </Stack>
 
-            {/* Pagination */}
+            {}
             {data.totalPages > 1 && (
-              <Box display="flex" justifyContent="center" mt={4}>
+              <Box display="flex" justifyContent="center" mt={5}>
                 <Pagination
                   count={data.totalPages}
                   page={filter.page || 1}
                   onChange={handlePageChange}
+                  size="large"
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      borderRadius: 0,
+                      color: 'text.primary',
+                      '&.Mui-selected': {
+                        bgcolor: 'text.primary',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: 'text.secondary',
+                        },
+                      },
+                    },
+                  }}
                 />
               </Box>
             )}
           </>
         ) : (
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              color: '#8B8B8B', 
-              textAlign: 'center', 
-              mt: 8 
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: { xs: 8, md: 12 },
             }}
           >
-            Вакансии не найдены
-          </Typography>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: 'text.secondary',
+                mb: 1,
+              }}
+            >
+              Вакансии не найдены
+            </Typography>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '1rem',
+                fontWeight: 400,
+                color: 'text.secondary',
+              }}
+            >
+              Попробуйте изменить параметры поиска
+            </Typography>
+          </Box>
         )}
       </Box>
     </Box>

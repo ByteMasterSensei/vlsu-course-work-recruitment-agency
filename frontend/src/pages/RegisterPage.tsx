@@ -7,8 +7,10 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  Stack,
+  Paper,
+  Link as MuiLink,
 } from '@mui/material';
+import { PersonAddOutlined } from '@mui/icons-material';
 import { authService } from '../services/authService';
 import type { RegisterData } from '../services/authService';
 
@@ -32,7 +34,7 @@ const RegisterPage = () => {
 
     try {
       await authService.register(formData);
-      navigate('/');
+      navigate('/vacancies');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Ошибка при регистрации');
     } finally {
@@ -41,48 +43,66 @@ const RegisterPage = () => {
   };
 
   return (
-    <Box 
-      sx={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#0D0D0D',
+    <Box
+      sx={{
+        minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        px: 3,
-        py: 4
+        px: 2,
+        py: 4,
+        bgcolor: 'background.default',
       }}
     >
-      <Box 
-        sx={{ 
+      <Paper
+        className="fade-in"
+        elevation={0}
+        sx={{
           width: '100%',
-          maxWidth: '500px',
-          backgroundColor: '#161616',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: 8,
-          p: 4
+          maxWidth: '600px',
+          p: { xs: 4, md: 5 },
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
+          borderRadius: 0,
         }}
       >
-        <Typography 
-          variant="h4" 
-          component="h1" 
-          gutterBottom 
-          sx={{ 
-            mb: 3,
-            fontWeight: 600,
-            textAlign: 'center'
-          }}
-        >
-          Регистрация
-        </Typography>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography
+            component="h1"
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '1.75rem',
+              fontWeight: 700,
+              letterSpacing: '-0.03em',
+              color: 'text.primary',
+              mb: 1,
+            }}
+          >
+            Регистрация
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.9375rem',
+              fontWeight: 400,
+              color: 'text.secondary',
+            }}
+          >
+            Создайте аккаунт для доступа к системе
+          </Typography>
+        </Box>
 
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ 
+          <Alert
+            severity="error"
+            sx={{
               mb: 3,
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#FCA5A5'
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.875rem',
+              borderRadius: 0,
+              border: '1px solid',
+              borderColor: 'error.main',
             }}
           >
             {error}
@@ -90,8 +110,8 @@ const RegisterPage = () => {
         )}
 
         <Box component="form" onSubmit={handleSubmit}>
-          <Stack spacing={2}>
-            <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
               <TextField
                 fullWidth
                 label="Имя"
@@ -138,32 +158,70 @@ const RegisterPage = () => {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
-          </Stack>
+          </Box>
 
           <Button
             type="submit"
             fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            size="large"
+            startIcon={loading ? null : <PersonAddOutlined />}
             disabled={loading}
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              color: 'white',
+              bgcolor: 'text.primary',
+              px: 3,
+              py: 1.5,
+              mt: 3.5,
+              mb: 2.5,
+              borderRadius: 0,
+              letterSpacing: '-0.015em',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                bgcolor: 'text.secondary',
+              },
+              '&:disabled': {
+                bgcolor: 'rgba(0, 0, 0, 0.12)',
+                color: 'rgba(0, 0, 0, 0.26)',
+              },
+            }}
           >
-            {loading ? <CircularProgress size={24} /> : 'Зарегистрироваться'}
+            {loading ? <CircularProgress size={24} sx={{ color: 'rgba(0, 0, 0, 0.26)' }} /> : 'Зарегистрироваться'}
           </Button>
 
-          <Box textAlign="center">
-            <Link 
-              to="/login" 
-              style={{ 
-                textDecoration: 'none', 
-                color: '#6366f1',
-                fontSize: '0.9375rem'
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '0.875rem',
+                fontWeight: 400,
+                color: 'text.secondary',
               }}
             >
-              Уже есть аккаунт? Войти
-            </Link>
+              Уже есть аккаунт?{' '}
+              <MuiLink
+                component={Link}
+                to="/login"
+                sx={{
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: 'text.primary',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                Войти
+              </MuiLink>
+            </Typography>
           </Box>
         </Box>
-      </Box>
+      </Paper>
     </Box>
   );
 };

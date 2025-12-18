@@ -1,59 +1,45 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RecruitmentAgency.API.Data;
 using RecruitmentAgency.API.DTOs.User;
-
 namespace RecruitmentAgency.API.Services;
-
 public interface IActionLogService
 {
     Task<ActionLogListResponseDto> GetActionLogsAsync(ActionLogFilterDto filter);
     Task<List<ActionLogDto>> GetUserActionLogsAsync(int userId);
 }
-
 public class ActionLogService : IActionLogService
 {
     private readonly ApplicationDbContext _context;
-
     public ActionLogService(ApplicationDbContext context)
     {
         _context = context;
     }
-
     public async Task<ActionLogListResponseDto> GetActionLogsAsync(ActionLogFilterDto filter)
     {
         var query = _context.ActionLogs
             .Include(al => al.User)
             .AsQueryable();
-
-        // Apply filters
         if (filter.UserId.HasValue)
         {
             query = query.Where(al => al.UserId == filter.UserId.Value);
         }
-
         if (!string.IsNullOrWhiteSpace(filter.ActionType))
         {
             query = query.Where(al => al.ActionType.ToString() == filter.ActionType);
         }
-
         if (!string.IsNullOrWhiteSpace(filter.EntityType))
         {
             query = query.Where(al => al.EntityType == filter.EntityType);
         }
-
         if (filter.StartDate.HasValue)
         {
             query = query.Where(al => al.CreatedAt >= filter.StartDate.Value);
         }
-
         if (filter.EndDate.HasValue)
         {
             query = query.Where(al => al.CreatedAt <= filter.EndDate.Value);
         }
-
         var totalCount = await query.CountAsync();
-
-        // Apply pagination
         var items = await query
             .OrderByDescending(al => al.CreatedAt)
             .Skip((filter.Page - 1) * filter.PageSize)
@@ -71,7 +57,6 @@ public class ActionLogService : IActionLogService
                 CreatedAt = al.CreatedAt
             })
             .ToListAsync();
-
         return new ActionLogListResponseDto
         {
             Items = items,
@@ -81,7 +66,6 @@ public class ActionLogService : IActionLogService
             TotalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize)
         };
     }
-
     public async Task<List<ActionLogDto>> GetUserActionLogsAsync(int userId)
     {
         return await _context.ActionLogs
@@ -103,4 +87,3 @@ public class ActionLogService : IActionLogService
             .ToListAsync();
     }
 }
-

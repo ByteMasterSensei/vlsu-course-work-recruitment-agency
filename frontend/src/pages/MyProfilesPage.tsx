@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Typography,
   Button,
@@ -14,16 +14,20 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
-  AppBar,
-  Toolbar,
 } from '@mui/material';
 import { Add, Edit, Delete, Visibility } from '@mui/icons-material';
-import { authService } from '../services/authService';
+import Navigation from '../components/Navigation';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { applicantProfileService } from '../services/applicantProfileService';
+
+const statusLabels: Record<string, string> = {
+  'Active': 'Активен',
+  'Archive': 'В архиве',
+  'NotLooking': 'Не ищу работу',
+};
 
 const MyProfilesPage = () => {
   const navigate = useNavigate();
-  const user = authService.getUser();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<number | null>(null);
@@ -55,112 +59,162 @@ const MyProfilesPage = () => {
 
   if (isLoading) {
     return (
-      <Box 
-        sx={{ 
-          minHeight: '100vh', 
-          backgroundColor: '#0D0D0D',
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center' 
-        }}
-      >
-        <CircularProgress />
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Navigation />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: 'calc(100vh - 64px)',
+          }}
+        >
+          <CircularProgress sx={{ color: 'text.primary' }} />
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#0D0D0D' }}>
-      {/* Header */}
-      <AppBar position="sticky" elevation={0}>
-        <Toolbar sx={{ maxWidth: '1440px', width: '100%', mx: 'auto', px: { xs: 3, md: 6 } }}>
-          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, fontWeight: 600, textDecoration: 'none', color: 'inherit' }}>
-            Кадровое агентство
-          </Typography>
-          <Button 
-            color="inherit" 
-            component={Link} 
-            to="/vacancies" 
-            sx={{ mr: 2, textTransform: 'none', fontWeight: 500 }}
-          >
-            Вакансии
-          </Button>
-          {user && (
-            <Typography variant="body2" sx={{ mr: 2, color: '#8B8B8B' }}>
-              {user.firstName} {user.lastName}
-            </Typography>
-          )}
-          <Button 
-            color="inherit" 
-            onClick={() => { authService.logout(); navigate('/login'); }}
-            sx={{ textTransform: 'none', fontWeight: 500 }}
-          >
-            Выйти
-          </Button>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Navigation />
 
-      {/* Main content */}
-      <Box sx={{ maxWidth: '1440px', mx: 'auto', px: { xs: 3, md: 6 }, py: 6 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-          <Typography 
-            variant="h1" 
-            sx={{ 
-              fontWeight: 600,
-              fontSize: { xs: '2rem', md: '2.5rem' },
-              letterSpacing: '-0.02em'
+      <Box
+        sx={{
+          maxWidth: '1200px',
+          mx: 'auto',
+          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 4, md: 6 },
+        }}
+      >
+        <Breadcrumbs />
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={4}
+          flexDirection={{ xs: 'column', sm: 'row' }}
+          gap={2}
+        >
+          <Typography
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: { xs: '1.75rem', md: '2rem' },
+              fontWeight: 700,
+              letterSpacing: '-0.03em',
+              color: 'text.primary',
             }}
           >
             Мои анкеты
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => navigate('/profiles/new')}
-            sx={{ textTransform: 'none' }}
-          >
-            Создать анкету
-          </Button>
+          {profiles && profiles.length > 0 && (
+            <Button
+              startIcon={<Add />}
+              onClick={() => navigate('/profiles/new')}
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '0.9375rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                color: 'white',
+                bgcolor: 'text.primary',
+                px: 2.5,
+                py: 1,
+                borderRadius: 0,
+                letterSpacing: '-0.015em',
+                transition: 'all 0.15s ease',
+                '&:hover': {
+                  bgcolor: 'text.secondary',
+                },
+              }}
+            >
+              Создать анкету
+            </Button>
+          )}
         </Box>
 
         {profiles && profiles.length > 0 ? (
           <Box sx={{ display: 'grid', gap: 2 }}>
-            {profiles.map((profile) => (
+            {profiles.map((profile, index) => (
               <Card
                 key={profile.id}
+                className="fade-in"
+                elevation={0}
                 sx={{
-                  transition: 'all 0.2s ease',
+                  bgcolor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'rgba(0, 0, 0, 0.06)',
+                  borderRadius: 0,
+                  transition: 'all 0.15s ease',
+                  animationDelay: `${index * 0.05}s`,
                   '&:hover': {
-                    transform: 'translateY(-2px)',
-                    borderColor: 'rgba(99, 102, 241, 0.4)'
-                  }
+                    borderColor: 'rgba(0, 0, 0, 0.12)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                  },
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="start">
-                    <Box sx={{ flex: 1 }}>
-                      <Typography 
-                        variant="h5" 
-                        gutterBottom
-                        sx={{ fontWeight: 600, mb: 1 }}
+                  <Box display="flex" justifyContent="space-between" alignItems="start" gap={2}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                          fontSize: '1.125rem',
+                          fontWeight: 600,
+                          letterSpacing: '-0.02em',
+                          color: 'text.primary',
+                          mb: 1.5,
+                        }}
                       >
                         {profile.desiredPosition || 'Анкета без указания должности'}
                       </Typography>
                       <Box display="flex" gap={1} mb={2} flexWrap="wrap">
-                        <Chip label={profile.status} size="small" />
+                        <Chip
+                          label={statusLabels[profile.status] || profile.status}
+                          size="small"
+                          sx={{
+                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            bgcolor: 'rgba(0, 0, 0, 0.06)',
+                            color: 'text.primary',
+                            borderRadius: 0,
+                          }}
+                        />
                         {profile.desiredSalary && (
-                          <Chip 
-                            label={profile.desiredSalary} 
-                            size="small" 
-                            sx={{ backgroundColor: 'rgba(99, 102, 241, 0.15)' }}
+                          <Chip
+                            label={profile.desiredSalary}
+                            size="small"
+                            sx={{
+                              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              bgcolor: 'rgba(0, 0, 0, 0.06)',
+                              color: 'text.primary',
+                              borderRadius: 0,
+                            }}
                           />
                         )}
                       </Box>
-                      <Typography variant="body2" sx={{ color: '#8B8B8B' }}>
+                      <Typography
+                        sx={{
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                          fontSize: '0.8125rem',
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                        }}
+                      >
                         Создано: {new Date(profile.createdAt).toLocaleDateString('ru-RU')}
                       </Typography>
                       {profile.updatedAt && (
-                        <Typography variant="body2" sx={{ color: '#8B8B8B' }}>
+                        <Typography
+                          sx={{
+                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
+                            color: 'text.disabled',
+                          }}
+                        >
                           Обновлено: {new Date(profile.updatedAt).toLocaleDateString('ru-RU')}
                         </Typography>
                       )}
@@ -168,19 +222,40 @@ const MyProfilesPage = () => {
                     <Box display="flex" gap={1} sx={{ ml: 2 }}>
                       <IconButton
                         onClick={() => navigate(`/profiles/${profile.id}`)}
-                        sx={{ color: '#8B8B8B', '&:hover': { color: '#6366f1' } }}
+                        sx={{
+                          color: 'text.secondary',
+                          transition: 'all 0.15s ease',
+                          '&:hover': {
+                            color: 'text.primary',
+                            bgcolor: 'action.hover',
+                          },
+                        }}
                       >
                         <Visibility />
                       </IconButton>
                       <IconButton
                         onClick={() => navigate(`/profiles/${profile.id}/edit`)}
-                        sx={{ color: '#8B8B8B', '&:hover': { color: '#6366f1' } }}
+                        sx={{
+                          color: 'text.secondary',
+                          transition: 'all 0.15s ease',
+                          '&:hover': {
+                            color: 'text.primary',
+                            bgcolor: 'action.hover',
+                          },
+                        }}
                       >
                         <Edit />
                       </IconButton>
                       <IconButton
                         onClick={() => handleDelete(profile.id)}
-                        sx={{ color: '#8B8B8B', '&:hover': { color: '#FCA5A5' } }}
+                        sx={{
+                          color: 'text.secondary',
+                          transition: 'all 0.15s ease',
+                          '&:hover': {
+                            color: 'error.main',
+                            bgcolor: 'action.hover',
+                          },
+                        }}
                       >
                         <Delete />
                       </IconButton>
@@ -191,15 +266,49 @@ const MyProfilesPage = () => {
             ))}
           </Box>
         ) : (
-          <Box textAlign="center" py={8}>
-            <Typography variant="h6" sx={{ color: '#8B8B8B', mb: 2 }}>
+          <Box textAlign="center" py={10}>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            >
               У вас пока нет анкет
             </Typography>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '1rem',
+                fontWeight: 400,
+                color: 'text.secondary',
+                mb: 3,
+              }}
+            >
+              Создайте свою первую анкету, чтобы начать поиск работы
+            </Typography>
             <Button
-              variant="contained"
+              size="large"
               startIcon={<Add />}
               onClick={() => navigate('/profiles/new')}
-              sx={{ textTransform: 'none' }}
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '0.9375rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                color: 'white',
+                bgcolor: 'text.primary',
+                px: 3,
+                py: 1.25,
+                borderRadius: 0,
+                letterSpacing: '-0.015em',
+                transition: 'all 0.15s ease',
+                '&:hover': {
+                  bgcolor: 'text.secondary',
+                },
+              }}
             >
               Создать первую анкету
             </Button>
@@ -207,35 +316,83 @@ const MyProfilesPage = () => {
         )}
       </Box>
 
-      <Dialog 
-        open={deleteDialogOpen} 
+      <Dialog
+        open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
         PaperProps={{
           sx: {
-            backgroundColor: '#161616',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: 8
-          }
+            borderRadius: 0,
+            border: '1px solid',
+            borderColor: 'rgba(0, 0, 0, 0.06)',
+          },
         }}
       >
-        <DialogTitle sx={{ color: '#FFFFFF' }}>Подтверждение удаления</DialogTitle>
+        <DialogTitle
+          sx={{
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontSize: '1.125rem',
+            fontWeight: 600,
+            color: 'text.primary',
+          }}
+        >
+          Подтверждение удаления
+        </DialogTitle>
         <DialogContent>
-          <Typography sx={{ color: '#8B8B8B' }}>Вы уверены, что хотите удалить эту анкету?</Typography>
+          <Typography
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.9375rem',
+              fontWeight: 400,
+              color: 'text.secondary',
+            }}
+          >
+            Вы уверены, что хотите удалить эту анкету? Это действие нельзя отменить.
+          </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button 
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
             onClick={() => setDeleteDialogOpen(false)}
-            sx={{ textTransform: 'none', color: '#8B8B8B' }}
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              color: 'text.primary',
+              bgcolor: 'transparent',
+              border: '1px solid',
+              borderColor: 'rgba(0, 0, 0, 0.1)',
+              px: 2.5,
+              py: 1,
+              borderRadius: 0,
+              letterSpacing: '-0.015em',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                bgcolor: 'rgba(0, 0, 0, 0.03)',
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+              },
+            }}
           >
             Отмена
           </Button>
-          <Button 
-            onClick={confirmDelete} 
-            sx={{ 
+          <Button
+            onClick={confirmDelete}
+            sx={{
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
               textTransform: 'none',
-              backgroundColor: '#EF4444',
-              color: '#FFFFFF',
-              '&:hover': { backgroundColor: '#DC2626' }
+              color: 'white',
+              bgcolor: 'error.main',
+              px: 2.5,
+              py: 1,
+              borderRadius: 0,
+              letterSpacing: '-0.015em',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                bgcolor: 'error.dark',
+              },
             }}
           >
             Удалить

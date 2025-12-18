@@ -1,130 +1,209 @@
-import { Typography, Box, Button, AppBar, Toolbar } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
+﻿import { Typography, Box, Button, Container, Card, CardContent } from '@mui/material';
+import { Link, Navigate } from 'react-router-dom';
+import { WorkOutline, PersonAddOutlined, TrendingUpOutlined, SecurityOutlined } from '@mui/icons-material';
+import Navigation from '../components/Navigation';
 import { authService } from '../services/authService';
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const user = authService.getUser();
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-  };
+  if (user) {
+    return <Navigate to="/vacancies" replace />;
+  }
+
+  const features = [
+    {
+      icon: <WorkOutline sx={{ fontSize: 40, color: 'text.primary' }} />,
+      title: 'Каталог вакансий',
+      description: 'Широкий выбор актуальных вакансий от ведущих компаний',
+    },
+    {
+      icon: <PersonAddOutlined sx={{ fontSize: 40, color: 'text.primary' }} />,
+      title: 'Простая регистрация',
+      description: 'Быстрое создание профиля и управление анкетами',
+    },
+    {
+      icon: <TrendingUpOutlined sx={{ fontSize: 40, color: 'text.primary' }} />,
+      title: 'Карьерный рост',
+      description: 'Найдите работу мечты и развивайте свою карьеру',
+    },
+    {
+      icon: <SecurityOutlined sx={{ fontSize: 40, color: 'text.primary' }} />,
+      title: 'Безопасность',
+      description: 'Защита ваших персональных данных на высшем уровне',
+    },
+  ];
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#0D0D0D' }}>
-      {/* Header как в cursor.com */}
-      <AppBar position="sticky" elevation={0}>
-        <Toolbar sx={{ maxWidth: '1440px', width: '100%', mx: 'auto', px: { xs: 3, md: 6 } }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Кадровое агентство
-          </Typography>
-          <Button 
-            color="inherit" 
-            component={Link} 
-            to="/vacancies" 
-            sx={{ mr: 2, textTransform: 'none', fontWeight: 500 }}
-          >
-            Вакансии
-          </Button>
-          {user && (
-            <>
-              <Button 
-                color="inherit" 
-                component={Link} 
-                to="/profiles" 
-                sx={{ mr: 2, textTransform: 'none', fontWeight: 500 }}
-              >
-                Мои анкеты
-              </Button>
-              <Typography variant="body2" sx={{ mr: 2, color: '#8B8B8B' }}>
-                {user.firstName} {user.lastName}
-              </Typography>
-            </>
-          )}
-          {user ? (
-            <Button 
-              color="inherit" 
-              onClick={handleLogout}
-              sx={{ textTransform: 'none', fontWeight: 500 }}
-            >
-              Выйти
-            </Button>
-          ) : (
-            <Button 
-              color="inherit" 
-              component={Link} 
-              to="/login"
-              sx={{ textTransform: 'none', fontWeight: 500 }}
-            >
-              Войти
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Navigation />
 
-      {/* Main content с сеткой как в cursor.com */}
-      <Box sx={{ maxWidth: '1440px', mx: 'auto', px: { xs: 3, md: 6 }, py: 8 }}>
-        <Box sx={{ mb: 6 }}>
-          <Typography 
-            variant="h1" 
-            sx={{ 
-              mb: 2, 
-              fontWeight: 600, 
-              fontSize: { xs: '2rem', md: '3rem' },
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2
-            }}
-          >
-            Добро пожаловать
-          </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              color: '#8B8B8B', 
-              fontSize: '1.125rem',
-              maxWidth: '600px'
-            }}
-          >
-            Система управления кадровым агентством для эффективного подбора персонала
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3, mt: 6 }}>
-          <Button
-            variant="contained"
-            size="large"
-            component={Link}
-            to="/vacancies"
-            sx={{ 
-              py: 2, 
-              px: 4,
-              textTransform: 'none',
-              fontSize: '1rem',
-              fontWeight: 500
-            }}
-          >
-            Перейти к каталогу вакансий
-          </Button>
-          {!user && (
-            <Button
-              variant="outlined"
-              size="large"
-              component={Link}
-              to="/register"
-              sx={{ 
-                py: 2, 
-                px: 4,
-                textTransform: 'none',
-                fontSize: '1rem',
-                fontWeight: 500
+      {}
+      <Box
+        sx={{
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
+          py: { xs: 10, md: 14 },
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box className="fade-in" sx={{ textAlign: 'center', maxWidth: '800px', mx: 'auto' }}>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' },
+                fontWeight: 700,
+                letterSpacing: '-0.04em',
+                lineHeight: 1.1,
+                color: 'text.primary',
+                mb: 3,
               }}
             >
-              Зарегистрироваться
-            </Button>
-          )}
-        </Box>
+              Найдите работу мечты
+            </Typography>
+            <Typography
+              sx={{
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: { xs: '1.125rem', md: '1.25rem' },
+                fontWeight: 400,
+                color: 'text.secondary',
+                mb: 5,
+                lineHeight: 1.6,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Современная платформа для эффективного подбора персонала и поиска работы
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                size="large"
+                component={Link}
+                to="/vacancies"
+                startIcon={<WorkOutline />}
+                sx={{
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  color: 'white',
+                  bgcolor: 'text.primary',
+                  px: 3,
+                  py: 1.25,
+                  borderRadius: 0,
+                  letterSpacing: '-0.015em',
+                  transition: 'all 0.15s ease',
+                  '&:hover': {
+                    bgcolor: 'text.secondary',
+                  },
+                }}
+              >
+                Смотреть вакансии
+              </Button>
+              <Button
+                size="large"
+                component={Link}
+                to="/register"
+                startIcon={<PersonAddOutlined />}
+                sx={{
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  color: 'text.primary',
+                  bgcolor: 'transparent',
+                  border: '1px solid',
+                  borderColor: 'rgba(0, 0, 0, 0.1)',
+                  px: 3,
+                  py: 1.25,
+                  borderRadius: 0,
+                  letterSpacing: '-0.015em',
+                  transition: 'all 0.15s ease',
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                    borderColor: 'rgba(0, 0, 0, 0.2)',
+                  },
+                }}
+              >
+                Зарегистрироваться
+              </Button>
+            </Box>
+          </Box>
+        </Container>
       </Box>
+
+      {}
+      <Container maxWidth="lg" sx={{ py: { xs: 10, md: 14 } }}>
+        <Typography
+          sx={{
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontSize: { xs: '1.75rem', md: '2rem' },
+            fontWeight: 700,
+            letterSpacing: '-0.03em',
+            textAlign: 'center',
+            color: 'text.primary',
+            mb: 8,
+          }}
+        >
+          Почему выбирают нас
+        </Typography>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+            gap: 3,
+          }}
+        >
+          {features.map((feature, index) => (
+            <Card
+              key={index}
+              className="fade-in"
+              elevation={0}
+              sx={{
+                height: '100%',
+                textAlign: 'center',
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'rgba(0, 0, 0, 0.06)',
+                borderRadius: 0,
+                transition: 'all 0.15s ease',
+                animationDelay: `${index * 0.1}s`,
+                '&:hover': {
+                  borderColor: 'rgba(0, 0, 0, 0.12)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                },
+              }}
+            >
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ mb: 2 }}>{feature.icon}</Box>
+                <Typography
+                  sx={{
+                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    letterSpacing: '-0.015em',
+                    color: 'text.primary',
+                    mb: 1.5,
+                  }}
+                >
+                  {feature.title}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: '0.875rem',
+                    fontWeight: 400,
+                    color: 'text.secondary',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {feature.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      </Container>
     </Box>
   );
 };

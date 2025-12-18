@@ -38,6 +38,37 @@ export interface VacancyListResponse {
   totalPages: number;
 }
 
+export interface CreateVacancyDto {
+  title: string;
+  companyName: string;
+  companyINN?: string;
+  description: string;
+  requirements?: string;
+  workingConditions?: string;
+  salaryRange?: string;
+  employmentType: number;
+  contactPerson?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  expiresAt?: string;
+}
+
+export interface UpdateVacancyDto {
+  title?: string;
+  companyName?: string;
+  companyINN?: string;
+  description?: string;
+  requirements?: string;
+  workingConditions?: string;
+  salaryRange?: string;
+  employmentType?: number;
+  status?: number;
+  contactPerson?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  expiresAt?: string;
+}
+
 class VacancyService {
   async getVacancies(filter: VacancyFilter = {}): Promise<VacancyListResponse> {
     const params = new URLSearchParams();
@@ -57,6 +88,20 @@ class VacancyService {
   async getVacancyById(id: number): Promise<Vacancy> {
     const response = await axiosInstance.get<Vacancy>(`/vacancies/${id}`);
     return response.data;
+  }
+
+  async createVacancy(data: CreateVacancyDto): Promise<Vacancy> {
+    const response = await axiosInstance.post<Vacancy>('/vacancies', data);
+    return response.data;
+  }
+
+  async updateVacancy(id: number, data: UpdateVacancyDto): Promise<Vacancy> {
+    const response = await axiosInstance.put<Vacancy>(`/vacancies/${id}`, data);
+    return response.data;
+  }
+
+  async deleteVacancy(id: number): Promise<void> {
+    await axiosInstance.delete(`/vacancies/${id}`);
   }
 }
 

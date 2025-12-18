@@ -1,30 +1,25 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecruitmentAgency.API.DTOs.Vacancy;
 using RecruitmentAgency.API.Models;
 using RecruitmentAgency.API.Services;
 using System.Security.Claims;
-
 namespace RecruitmentAgency.API.Controllers;
-
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/vacancies")]
 public class VacanciesController : ControllerBase
 {
     private readonly IVacancyService _vacancyService;
-
     public VacanciesController(IVacancyService vacancyService)
     {
         _vacancyService = vacancyService;
     }
-
     [HttpGet]
     public async Task<ActionResult<VacancyListResponseDto>> GetVacancies([FromQuery] VacancyFilterDto filter)
     {
         var result = await _vacancyService.GetVacanciesAsync(filter);
         return Ok(result);
     }
-
     [HttpGet("{id}")]
     public async Task<ActionResult<VacancyDto>> GetVacancy(int id)
     {
@@ -35,7 +30,6 @@ public class VacanciesController : ControllerBase
         }
         return Ok(vacancy);
     }
-
     [HttpPost]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<VacancyDto>> CreateVacancy([FromBody] CreateVacancyDto dto)
@@ -44,7 +38,6 @@ public class VacanciesController : ControllerBase
         var vacancy = await _vacancyService.CreateVacancyAsync(dto, userId);
         return CreatedAtAction(nameof(GetVacancy), new { id = vacancy.Id }, vacancy);
     }
-
     [HttpPut("{id}")]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<VacancyDto>> UpdateVacancy(int id, [FromBody] UpdateVacancyDto dto)
@@ -57,7 +50,6 @@ public class VacanciesController : ControllerBase
         }
         return Ok(vacancy);
     }
-
     [HttpDelete("{id}")]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteVacancy(int id)
@@ -71,4 +63,3 @@ public class VacanciesController : ControllerBase
         return NoContent();
     }
 }
-

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -7,15 +7,12 @@ using System;
 using System.Threading;
 using RecruitmentAgency.API.Data;
 using RecruitmentAgency.API.Services;
+using RecruitmentAgency.API.Models;
+using RecruitmentAgency.API.Helpers;
 using AutoMapper;
-
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-// Configure Swagger/OpenAPI
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -24,8 +21,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API для системы управления кадровым агентством"
     });
-
-    // Add JWT authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
@@ -34,7 +29,6 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -50,18 +44,12 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
-// Configure Entity Framework
-// Build connection string explicitly
 var server = Environment.GetEnvironmentVariable("DB_SERVER") ?? "mysql";
 var database = Environment.GetEnvironmentVariable("DB_DATABASE") ?? "RecruitmentAgencyDB";
 var user = Environment.GetEnvironmentVariable("DB_USER") ?? "appuser";
 var password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "apppassword";
 var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
-
 var connectionString = $"Server={server};Database={database};User={user};Password={password};Port={port};";
-
-// Also try from configuration
 if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("localhost"))
 {
     connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
@@ -69,12 +57,9 @@ if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("localho
         ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 }
-
 Console.WriteLine($"[DEBUG] Connection string: {connectionString?.Replace("Password=apppassword", "Password=***")}");
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    // Use explicit version with retry on failure
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 33)), 
         mysqlOptions =>
         {
@@ -83,13 +68,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorNumbersToAdd: null);
         });
-    options.EnableSensitiveDataLogging(); // For debugging
+    options.EnableSensitiveDataLogging();
 });
-
-// Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -108,10 +90,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
-
 builder.Services.AddAuthorization();
-
-// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -122,11 +101,7 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
-// Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
-
-// Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVacancyService, VacancyService>();
 builder.Services.AddScoped<IApplicantProfileService, ApplicantProfileService>();
@@ -134,34 +109,61 @@ builder.Services.AddScoped<IAccessRightService, AccessRightService>();
 builder.Services.AddScoped<IPersonnelSelectionService, PersonnelSelectionService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IActionLogService, ActionLogService>();
-
-// Configure Kestrel to listen on port 80
 builder.WebHost.UseKestrel(options =>
 {
     options.ListenAnyIP(80);
 });
-
 var app = builder.Build();
-
-// Configure the HTTP request pipeline
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    context.Database.EnsureCreated();
+    if (!context.Users.Any(u => u.Email == "admin@agency.ru"))
+    {
+        context.Users.Add(new User
+        {
+            Email = "admin@agency.ru",
+            PasswordHash = PasswordHasher.HashPassword("admin123"),
+            FirstName = "Администратор",
+            LastName = "Системы",
+            Phone = "+7 (999) 999-99-99",
+            Role = UserRole.Admin,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true
+        });
+        context.SaveChanges();
+        Console.WriteLine("[INFO] Admin user created: admin@agency.ru / admin123");
+    }
+    if (!context.Users.Any(u => u.Email == "manager@agency.ru"))
+    {
+        context.Users.Add(new User
+        {
+            Email = "manager@agency.ru",
+            PasswordHash = PasswordHasher.HashPassword("manager123"),
+            FirstName = "Иван",
+            LastName = "Менеджеров",
+            MiddleName = "Петрович",
+            Phone = "+7 (999) 888-77-66",
+            Role = UserRole.Manager,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true
+        });
+        context.SaveChanges();
+        Console.WriteLine("[INFO] Manager user created: manager@agency.ru / manager123");
+    }
+}
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Recruitment Agency API v1");
-    c.RoutePrefix = "swagger"; // Swagger доступен по /swagger
+    c.RoutePrefix = "swagger";
 });
-
-// Only use HTTPS redirection in production
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-
 app.UseCors("AllowFrontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
