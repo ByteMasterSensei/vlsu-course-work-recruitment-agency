@@ -21,3 +21,4 @@ public class RegisterDto
     [MaxLength(20)]
     public string? Phone { get; set; }
 }
+

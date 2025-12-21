@@ -31,3 +31,4 @@ public class ApplicantProfile
     public virtual ICollection<WorkExperience> WorkExperiences { get; set; } = new List<WorkExperience>();
     public virtual ICollection<ApplicantSkill> Skills { get; set; } = new List<ApplicantSkill>();
 }
+

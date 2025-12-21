@@ -55,3 +55,4 @@ public class Vacancy
     public DateTime? UpdatedAt { get; set; }
     public virtual ICollection<FavoriteVacancy> FavoriteVacancies { get; set; } = new List<FavoriteVacancy>();
 }
+

@@ -22,3 +22,4 @@ public class WorkExperience
     public bool IsCurrentJob { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+

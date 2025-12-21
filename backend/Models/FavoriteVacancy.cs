@@ -15,3 +15,4 @@ public class FavoriteVacancy
     public virtual Vacancy Vacancy { get; set; } = null!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+

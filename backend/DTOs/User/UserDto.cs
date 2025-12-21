@@ -50,3 +50,4 @@ public class ActionLogListResponseDto
     public int PageSize { get; set; }
     public int TotalPages { get; set; }
 }
+

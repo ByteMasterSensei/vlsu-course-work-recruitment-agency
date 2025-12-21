@@ -20,3 +20,4 @@ public class Education
     public int? GraduationYear { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+

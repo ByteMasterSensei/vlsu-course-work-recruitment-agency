@@ -25,3 +25,4 @@ public class AccessRight
     public DateTime? UsedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+

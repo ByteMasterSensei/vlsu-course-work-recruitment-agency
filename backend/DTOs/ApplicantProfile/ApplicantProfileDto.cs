@@ -83,3 +83,4 @@ public class UpdateApplicantProfileDto
     public List<CreateWorkExperienceDto>? WorkExperiences { get; set; }
     public List<CreateApplicantSkillDto>? Skills { get; set; }
 }
+

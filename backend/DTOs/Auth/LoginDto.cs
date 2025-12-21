@@ -8,3 +8,4 @@ public class LoginDto
     [Required]
     public string Password { get; set; } = string.Empty;
 }
+

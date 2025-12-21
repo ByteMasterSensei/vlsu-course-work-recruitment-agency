@@ -41,3 +41,4 @@ public class User
     public virtual ICollection<UserSession> Sessions { get; set; } = new List<UserSession>();
     public virtual ICollection<FavoriteVacancy> FavoriteVacancies { get; set; } = new List<FavoriteVacancy>();
 }
+

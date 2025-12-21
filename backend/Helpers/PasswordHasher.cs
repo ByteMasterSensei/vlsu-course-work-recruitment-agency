@@ -15,3 +15,4 @@ public static class PasswordHasher
         return hashOfInput == hashedPassword;
     }
 }
+
