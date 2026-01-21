@@ -6,6 +6,7 @@ public interface IActionLogService
 {
     Task<ActionLogListResponseDto> GetActionLogsAsync(ActionLogFilterDto filter);
     Task<List<ActionLogDto>> GetUserActionLogsAsync(int userId);
+    Task LogActionAsync(int userId, string actionType, string entityType, int? entityId, string? description);
 }
 public class ActionLogService : IActionLogService
 {
@@ -86,5 +87,26 @@ public class ActionLogService : IActionLogService
             })
             .ToListAsync();
     }
+
+    public async Task LogActionAsync(int userId, string actionType, string entityType, int? entityId, string? description)
+    {
+        var actionLog = new Models.ActionLog
+        {
+            UserId = userId,
+            ActionType = Enum.TryParse<Models.ActionType>(actionType, out var at) ? at : Models.ActionType.View,
+            EntityType = entityType,
+            EntityId = entityId,
+            Description = description,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.ActionLogs.Add(actionLog);
+        await _context.SaveChangesAsync();
+    }
 }
+
+
+
+
+
 

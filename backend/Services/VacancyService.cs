@@ -74,8 +74,8 @@ public class VacancyService : IVacancyService
                 Requirements = v.Requirements,
                 WorkingConditions = v.WorkingConditions,
                 SalaryRange = v.SalaryRange,
-                EmploymentType = v.EmploymentType.ToString(),
-                Status = v.Status.ToString(),
+                EmploymentType = GetEmploymentTypeName(v.EmploymentType),
+                Status = GetVacancyStatusName(v.Status),
                 ContactPerson = v.ContactPerson,
                 ContactEmail = v.ContactEmail,
                 ContactPhone = v.ContactPhone,
@@ -107,8 +107,8 @@ public class VacancyService : IVacancyService
             Requirements = vacancy.Requirements,
             WorkingConditions = vacancy.WorkingConditions,
             SalaryRange = vacancy.SalaryRange,
-            EmploymentType = vacancy.EmploymentType.ToString(),
-            Status = vacancy.Status.ToString(),
+            EmploymentType = GetEmploymentTypeName(vacancy.EmploymentType),
+            Status = GetVacancyStatusName(vacancy.Status),
             ContactPerson = vacancy.ContactPerson,
             ContactEmail = vacancy.ContactEmail,
             ContactPhone = vacancy.ContactPhone,
@@ -170,5 +170,28 @@ public class VacancyService : IVacancyService
         _context.Vacancies.Remove(vacancy);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    private static string GetVacancyStatusName(VacancyStatus status)
+    {
+        return status switch
+        {
+            VacancyStatus.Active => "Активна",
+            VacancyStatus.Paused => "На паузе",
+            VacancyStatus.Closed => "Закрыта",
+            _ => "Неизвестно"
+        };
+    }
+
+    private static string GetEmploymentTypeName(EmploymentType type)
+    {
+        return type switch
+        {
+            EmploymentType.FullTime => "Полная занятость",
+            EmploymentType.PartTime => "Частичная занятость",
+            EmploymentType.Contract => "Контракт",
+            EmploymentType.Internship => "Стажировка",
+            _ => "Неизвестно"
+        };
     }
 }

@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ActionLog> ActionLogs { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }
     public DbSet<FavoriteVacancy> FavoriteVacancies { get; set; }
+    public DbSet<VacancyApplication> VacancyApplications { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -76,6 +77,13 @@ public class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.VacancyId);
             entity.HasIndex(e => new { e.UserId, e.VacancyId }).IsUnique();
+        });
+        modelBuilder.Entity<VacancyApplication>(entity =>
+        {
+            entity.HasIndex(e => e.ApplicantProfileId);
+            entity.HasIndex(e => e.VacancyId);
+            entity.HasIndex(e => new { e.ApplicantProfileId, e.VacancyId }).IsUnique();
+            entity.Property(e => e.Status).HasConversion<int>();
         });
         modelBuilder.Entity<Vacancy>()
             .HasOne(v => v.CreatedByUser)

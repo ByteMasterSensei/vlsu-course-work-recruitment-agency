@@ -20,10 +20,11 @@ import Navigation from '../components/Navigation';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { applicantProfileService } from '../services/applicantProfileService';
 
-const statusLabels: Record<string, string> = {
-  'Active': 'Активен',
-  'Archive': 'В архиве',
-  'NotLooking': 'Не ищу работу',
+const statusColors: Record<string, string> = {
+  'Черновик': 'warning.light',
+  'Активна': 'success.light',
+  'Отправлена': 'info.light',
+  'Архивная': 'grey.300',
 };
 
 const MyProfilesPage = () => {
@@ -170,13 +171,13 @@ const MyProfilesPage = () => {
                       </Typography>
                       <Box display="flex" gap={1} mb={2} flexWrap="wrap">
                         <Chip
-                          label={statusLabels[profile.status] || profile.status}
+                          label={profile.status}
                           size="small"
                           sx={{
                             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                             fontSize: '0.75rem',
                             fontWeight: 600,
-                            bgcolor: 'rgba(0, 0, 0, 0.06)',
+                            bgcolor: statusColors[profile.status] || 'rgba(0, 0, 0, 0.06)',
                             color: 'text.primary',
                             borderRadius: 0,
                           }}

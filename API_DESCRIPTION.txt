@@ -1,0 +1,262 @@
+API ДОКУМЕНТАЦИЯ - СИСТЕМА РЕКРУТИНГОВОГО АГЕНТСТВА
+================================================================================
+
+АУТЕНТИФИКАЦИЯ И АВТОРИЗАЦИЯ
+================================================================================
+
+POST   /api/auth/register
+Описание: Регистрация нового пользователя
+Тело запроса: { "email": "", "password": "", "firstName": "", "lastName": "", "middleName": "", "phone": "" }
+Ответ: AuthResponseDto с токенами доступа
+
+POST   /api/auth/login
+Описание: Вход по email и паролю
+Тело запроса: { "email": "", "password": "" }
+Ответ: AuthResponseDto с токенами доступа
+
+POST   /api/auth/refresh
+Описание: Обновление токена доступа
+Тело запроса: { "refreshToken": "" }
+Ответ: AuthResponseDto с новыми токенами
+
+Примечание: (auth) - требует аутентификации, (admin) - требует роль Admin, (manager) - требует роль Manager или Admin
+
+
+ВАКАНСИИ
+================================================================================
+
+GET    /api/vacancies
+Описание: Получить список вакансий с фильтрацией и пагинацией
+Query параметры: search, companyName, employmentType, status, page, pageSize, sortBy, sortDescending
+Ответ: VacancyListResponseDto со списком вакансий и метаданными пагинации
+
+GET    /api/vacancies/{id}
+Описание: Получить вакансию по ID
+Ответ: VacancyDto
+
+POST   /api/vacancies (manager, admin)
+Описание: Создать новую вакансию
+Тело запроса: CreateVacancyDto
+  {
+    "title": "",
+    "companyName": "",
+    "companyINN": "",
+    "description": "",
+    "requirements": "",
+    "workingConditions": "",
+    "salaryRange": "",
+    "employmentType": 0,  // 0=FullTime, 1=PartTime, 2=Contract, 3=Internship
+    "contactPerson": "",
+    "contactEmail": "",
+    "contactPhone": "",
+    "expiresAt": ""
+  }
+Ответ: VacancyDto
+
+PUT    /api/vacancies/{id} (manager, admin)
+Описание: Обновить вакансию
+Тело запроса: UpdateVacancyDto (все поля опциональны)
+Ответ: VacancyDto
+
+DELETE /api/vacancies/{id} (manager, admin)
+Описание: Удалить вакансию
+Ответ: 204 No Content
+
+
+ИЗБРАННЫЕ ВАКАНСИИ
+================================================================================
+
+GET    /api/favorite-vacancies (auth)
+Описание: Получить список избранных вакансий текущего пользователя
+Ответ: List<VacancyDto>
+
+POST   /api/favorite-vacancies/{vacancyId} (auth)
+Описание: Добавить вакансию в избранное
+Ответ: { "message": "Вакансия добавлена в избранное" }
+
+DELETE /api/favorite-vacancies/{vacancyId} (auth)
+Описание: Удалить вакансию из избранного
+Ответ: 204 No Content
+
+
+ПРОФИЛИ СОИСКАТЕЛЕЙ
+================================================================================
+
+GET    /api/applicant-profiles/my (auth)
+Описание: Получить свои профили соискателя
+Ответ: List<ApplicantProfileDto>
+
+GET    /api/applicant-profiles (auth)
+Описание: Получить все профили соискателей
+Доступ: Manager, Admin или пользователи с правами доступа
+Ответ: List<ApplicantProfileDto>
+
+GET    /api/applicant-profiles/{id} (auth)
+Описание: Получить профиль соискателя по ID
+Ответ: ApplicantProfileDto
+
+POST   /api/applicant-profiles (auth)
+Описание: Создать новый профиль соискателя
+Тело запроса: CreateApplicantProfileDto
+  {
+    "position": "",
+    "desiredSalary": "",
+    "experienceYears": 0,
+    "skills": [],
+    "educations": [],
+    "workExperiences": []
+  }
+Ответ: ApplicantProfileDto
+
+PUT    /api/applicant-profiles/{id} (auth)
+Описание: Обновить профиль соискателя
+Тело запроса: UpdateApplicantProfileDto
+Ответ: ApplicantProfileDto
+
+DELETE /api/applicant-profiles/{id} (auth)
+Описание: Удалить профиль соискателя
+Ответ: 204 No Content
+
+PATCH  /api/applicant-profiles/{id}/status (auth)
+Описание: Обновить статус профиля
+Тело запроса: { "status": 0 }
+Ответ: 204 No Content
+
+
+ПОДБОР ПЕРСОНАЛА
+================================================================================
+
+POST   /api/personnel-selection/search (manager, admin)
+Описание: Поиск персонала по критериям
+Тело запроса: PersonnelSearchDto
+  {
+    "position": "",
+    "minExperienceYears": 0,
+    "requiredSkills": [],
+    "desiredSalary": "",
+    "employmentType": 0
+  }
+Ответ: List<PersonnelSearchResultDto>
+
+
+ПРАВА ДОСТУПА
+================================================================================
+
+GET    /api/access-rights (manager, admin)
+Описание: Получить все выданные права доступа
+Ответ: List<AccessRightDto>
+
+POST   /api/access-rights (manager, admin)
+Описание: Выдать право доступа пользователю
+Тело запроса: CreateAccessRightDto
+  {
+    "grantedToUserId": 0,
+    "description": ""
+  }
+Ответ: AccessRightDto
+
+DELETE /api/access-rights/{id} (manager, admin)
+Описание: Отозвать право доступа
+Ответ: 204 No Content
+
+GET    /api/access-rights/check (auth)
+Описание: Проверить наличие прав доступа у текущего пользователя
+Ответ: boolean
+
+GET    /api/access-rights/applicants (manager, admin)
+Описание: Получить список соискателей для выдачи прав доступа
+Ответ: List<ApplicantForAccessDto>
+
+
+УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (АДМИН)
+================================================================================
+
+GET    /api/users (admin)
+Описание: Получить список всех пользователей
+Ответ: List<UserManagementDto>
+
+GET    /api/users/{id} (admin)
+Описание: Получить пользователя по ID
+Ответ: UserManagementDto
+
+PUT    /api/users/{id} (admin)
+Описание: Обновить данные пользователя
+Тело запроса: UpdateUserDto
+  {
+    "email": "",
+    "firstName": "",
+    "lastName": "",
+    "middleName": "",
+    "phone": "",
+    "role": 0,  // 0=Visitor, 1=Applicant, 2=Manager, 3=Admin
+    "isActive": true
+  }
+Ответ: UserManagementDto
+
+DELETE /api/users/{id} (admin)
+Описание: Удалить пользователя
+Ответ: 204 No Content
+
+
+ЖУРНАЛ ДЕЙСТВИЙ (АДМИН)
+================================================================================
+
+GET    /api/action-logs (admin)
+Описание: Получить журнал действий с фильтрацией
+Query параметры: userId, actionType, startDate, endDate, page, pageSize
+Ответ: ActionLogListResponseDto
+
+GET    /api/action-logs/user/{userId} (admin)
+Описание: Получить журнал действий конкретного пользователя
+Ответ: List<ActionLogDto>
+
+
+СТАТУСЫ И ТИПЫ
+================================================================================
+
+EmploymentType (тип занятости):
+  0 - FullTime (Полная занятость)
+  1 - PartTime (Частичная занятость)
+  2 - Contract (Договор)
+  3 - Internship (Стажировка)
+
+VacancyStatus (статус вакансии):
+  0 - Active (Активна)
+  1 - Paused (Приостановлена)
+  2 - Closed (Закрыта)
+
+UserRole (роль пользователя):
+  0 - Visitor (Посетитель)
+  1 - Applicant (Соискатель)
+  2 - Manager (Менеджер)
+  3 - Admin (Администратор)
+
+
+АВТОРИЗАЦИЯ
+================================================================================
+
+Все защищенные эндпоинты требуют JWT токен в заголовке Authorization:
+  Authorization: Bearer {accessToken}
+
+Токены выдаются при успешной регистрации или входе и содержат:
+  - User ID (NameIdentifier)
+  - Email
+  - Role (роль пользователя)
+
+Токены имеют ограниченный срок действия. Для обновления используется refresh token.
+
+
+ОШИБКИ
+================================================================================
+
+400 Bad Request - Неверный формат запроса или данные
+401 Unauthorized - Требуется аутентификация или неверные учетные данные
+403 Forbidden - Недостаточно прав доступа
+404 Not Found - Ресурс не найден
+500 Internal Server Error - Внутренняя ошибка сервера
+
+Формат ответа с ошибкой:
+  {
+    "message": "Описание ошибки"
+  }
+

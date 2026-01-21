@@ -11,13 +11,25 @@ import {
   Snackbar,
   Alert,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
+import { Send } from '@mui/icons-material';
 import { ArrowBack, Favorite, FavoriteBorder } from '@mui/icons-material';
 import Navigation from '../components/Navigation';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { authService } from '../services/authService';
 import { vacancyService } from '../services/vacancyService';
 import { favoriteVacancyService } from '../services/favoriteVacancyService';
+import { vacancyApplicationService } from '../services/vacancyApplicationService';
+import { applicantProfileService } from '../services/applicantProfileService';
 
 const employmentTypeLabels: Record<string, string> = {
   'FullTime': 'Полная занятость',
@@ -35,6 +47,10 @@ const VacancyDetailsPage = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [applyDialogOpen, setApplyDialogOpen] = useState(false);
+  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
+  const [coverLetter, setCoverLetter] = useState('');
 
   const { data: vacancy, isLoading, error } = useQuery({
     queryKey: ['vacancy', id],
@@ -45,6 +61,12 @@ const VacancyDetailsPage = () => {
   const { data: favorites } = useQuery({
     queryKey: ['favoriteVacancies'],
     queryFn: () => favoriteVacancyService.getFavorites(),
+    enabled: !!user,
+  });
+
+  const { data: myProfiles } = useQuery({
+    queryKey: ['myProfiles'],
+    queryFn: () => applicantProfileService.getMyProfiles(),
     enabled: !!user,
   });
 
@@ -80,6 +102,38 @@ const VacancyDetailsPage = () => {
       removeFromFavoritesMutation.mutate(vacancy.id);
     } else {
       addToFavoritesMutation.mutate(vacancy.id);
+    }
+  };
+
+  const handleApplyClick = () => {
+    if (myProfiles && myProfiles.length > 0) {
+      // Предвыбираем первый профиль
+      setSelectedProfileId(myProfiles[0].id);
+      setApplyDialogOpen(true);
+    } else {
+      setSnackbarMessage('Сначала создайте анкету в разделе "Мои анкеты"');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleApplySubmit = async () => {
+    if (!selectedProfileId || !vacancy) return;
+    try {
+      await vacancyApplicationService.createApplication({
+        applicantProfileId: selectedProfileId,
+        vacancyId: vacancy.id,
+        coverLetter: coverLetter || undefined,
+      });
+      setApplyDialogOpen(false);
+      setCoverLetter('');
+      setSnackbarMessage('Отклик успешно отправлен!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (err: any) {
+      setSnackbarMessage(err.response?.data?.message || 'Ошибка при отправке отклика');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   };
 
@@ -450,8 +504,91 @@ const VacancyDetailsPage = () => {
               </Typography>
             )}
           </Box>
+
+          {user && (
+            <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<Send />}
+                onClick={handleApplyClick}
+                sx={{
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 0,
+                  letterSpacing: '-0.015em',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                }}
+              >
+                Откликнуться на вакансию
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
+
+      <Dialog open={applyDialogOpen} onClose={() => setApplyDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+          Откликнуться на вакансию
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2, color: 'text.secondary' }}>
+            Вакансия: {vacancy?.title}
+          </Typography>
+          {myProfiles && myProfiles.length > 0 ? (
+            <>
+              <FormControl fullWidth sx={{ mb: 2, mt: 1 }}>
+                <InputLabel>Выберите анкету</InputLabel>
+                <Select
+                  value={selectedProfileId || ''}
+                  label="Выберите анкету"
+                  onChange={(e) => setSelectedProfileId(Number(e.target.value))}
+                >
+                  {myProfiles.map((profile: any) => (
+                    <MenuItem key={profile.id} value={profile.id}>
+                      {profile.desiredPosition || `Анкета #${profile.id}`} 
+                      ({profile.status})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Сопроводительное письмо (необязательно)"
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                placeholder="Расскажите, почему вы подходите на эту позицию..."
+              />
+            </>
+          ) : (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              У вас нет анкет. Сначала создайте анкету в разделе "Мои анкеты".
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setApplyDialogOpen(false)}>Отмена</Button>
+          {myProfiles && myProfiles.length > 0 && (
+            <Button 
+              variant="contained" 
+              onClick={handleApplySubmit}
+              disabled={!selectedProfileId}
+            >
+              Отправить отклик
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbarOpen}
@@ -461,7 +598,7 @@ const VacancyDetailsPage = () => {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity="success"
+          severity={snackbarSeverity}
           sx={{
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontSize: '0.875rem',

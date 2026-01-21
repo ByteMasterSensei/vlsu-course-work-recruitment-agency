@@ -26,3 +26,8 @@ public class AccessRight
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
+
+
+
+
+

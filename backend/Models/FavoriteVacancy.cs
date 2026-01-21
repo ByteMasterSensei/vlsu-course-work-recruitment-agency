@@ -16,3 +16,8 @@ public class FavoriteVacancy
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
+
+
+
+
+

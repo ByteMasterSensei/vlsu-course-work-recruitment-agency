@@ -52,7 +52,7 @@ public class ApplicantProfileService : IApplicantProfileService
             .Include(ap => ap.Educations)
             .Include(ap => ap.WorkExperiences)
             .Include(ap => ap.Skills)
-            .Where(ap => ap.Status == ApplicantStatus.Active)
+            .Where(ap => ap.Status == ApplicantStatus.Active || ap.Status == ApplicantStatus.Submitted)
             .AsQueryable();
         return await query.Select(ap => MapToDto(ap)).ToListAsync();
     }
@@ -66,7 +66,7 @@ public class ApplicantProfileService : IApplicantProfileService
             AdditionalInfo = dto.AdditionalInfo,
             ReadyToRelocate = dto.ReadyToRelocate,
             ReadyForBusinessTrips = dto.ReadyForBusinessTrips,
-            Status = ApplicantStatus.Active,
+            Status = ApplicantStatus.Draft,
             CreatedAt = DateTime.UtcNow
         };
         _context.ApplicantProfiles.Add(profile);
@@ -223,7 +223,7 @@ public class ApplicantProfileService : IApplicantProfileService
             AdditionalInfo = profile.AdditionalInfo,
             ReadyToRelocate = profile.ReadyToRelocate,
             ReadyForBusinessTrips = profile.ReadyForBusinessTrips,
-            Status = profile.Status.ToString(),
+            Status = GetStatusName(profile.Status),
             CreatedAt = profile.CreatedAt,
             UpdatedAt = profile.UpdatedAt,
             Educations = profile.Educations.Select(e => new EducationDto
@@ -250,6 +250,18 @@ public class ApplicantProfileService : IApplicantProfileService
                 SkillName = s.SkillName,
                 SkillLevel = s.SkillLevel
             }).ToList()
+        };
+    }
+
+    private static string GetStatusName(ApplicantStatus status)
+    {
+        return status switch
+        {
+            ApplicantStatus.Draft => "Черновик",
+            ApplicantStatus.Active => "Активна",
+            ApplicantStatus.Submitted => "Отправлена",
+            ApplicantStatus.Archive => "Архивная",
+            _ => "Неизвестно"
         };
     }
 }

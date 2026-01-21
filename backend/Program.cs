@@ -109,6 +109,7 @@ builder.Services.AddScoped<IAccessRightService, AccessRightService>();
 builder.Services.AddScoped<IPersonnelSelectionService, PersonnelSelectionService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IActionLogService, ActionLogService>();
+builder.Services.AddScoped<IVacancyApplicationService, VacancyApplicationService>();
 builder.WebHost.UseKestrel(options =>
 {
     options.ListenAnyIP(80);

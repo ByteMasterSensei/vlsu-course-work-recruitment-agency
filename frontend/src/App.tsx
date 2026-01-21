@@ -10,6 +10,7 @@ import CreateProfilePage from "./pages/CreateProfilePage";
 import ProfileDetailsPage from "./pages/ProfileDetailsPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import FavoritesPage from "./pages/FavoritesPage";
+import MyApplicationsPage from "./pages/MyApplicationsPage";
 import ApplicantsPage from "./pages/ApplicantsPage";
 import PersonnelSelectionPage from "./pages/PersonnelSelectionPage";
 import ManageVacanciesPage from "./pages/ManageVacanciesPage";
@@ -66,6 +67,14 @@ function App() {
           element={
             <ProtectedRoute>
               <FavoritesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-applications"
+          element={
+            <ProtectedRoute>
+              <MyApplicationsPage />
             </ProtectedRoute>
           }
         />

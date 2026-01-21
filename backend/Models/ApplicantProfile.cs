@@ -3,9 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RecruitmentAgency.API.Models;
 public enum ApplicantStatus
 {
-    Active = 0,
-    Archive = 1,
-    NotLooking = 2
+    Draft = 0,
+    Active = 1,
+    Submitted = 2,
+    Archive = 3
 }
 public class ApplicantProfile
 {
@@ -24,11 +25,17 @@ public class ApplicantProfile
     public bool ReadyToRelocate { get; set; } = false;
     public bool ReadyForBusinessTrips { get; set; } = false;
     [Required]
-    public ApplicantStatus Status { get; set; } = ApplicantStatus.Active;
+    public ApplicantStatus Status { get; set; } = ApplicantStatus.Draft;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public virtual ICollection<Education> Educations { get; set; } = new List<Education>();
     public virtual ICollection<WorkExperience> WorkExperiences { get; set; } = new List<WorkExperience>();
     public virtual ICollection<ApplicantSkill> Skills { get; set; } = new List<ApplicantSkill>();
+    public virtual ICollection<VacancyApplication> VacancyApplications { get; set; } = new List<VacancyApplication>();
 }
+
+
+
+
+
 

@@ -14,9 +14,10 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import { applicantProfileService } from '../services/applicantProfileService';
 
 const statusLabels: Record<string, string> = {
-  'Active': 'Активен',
-  'Archive': 'В архиве',
-  'NotLooking': 'Не ищу работу',
+  'Активна': 'Активен',
+  'Архивная': 'В архиве',
+  'Черновик': 'Черновик',
+  'Отправлена': 'Отправлена',
 };
 
 const ProfileDetailsPage = () => {

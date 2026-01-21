@@ -17,3 +17,8 @@ public class ApplicantSkill
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
+
+
+
+
+

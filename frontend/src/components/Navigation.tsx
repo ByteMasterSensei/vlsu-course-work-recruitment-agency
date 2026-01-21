@@ -25,6 +25,7 @@ import {
   HistoryOutlined,
   VpnKeyOutlined,
   BusinessOutlined,
+  SendOutlined,
 } from "@mui/icons-material";
 import { authService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
@@ -183,6 +184,11 @@ const Navigation = () => {
                 to="/favorites"
                 label="Избранное"
                 active={isActive("/favorites")}
+              />
+              <NavButton
+                to="/my-applications"
+                label="Мои отклики"
+                active={isActive("/my-applications")}
               />
             </>
           )}
@@ -527,6 +533,16 @@ const Navigation = () => {
                     sx={{ mr: 1.5, fontSize: 20, opacity: 0.7 }}
                   />
                   Избранное
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/my-applications"
+                  onClick={handleMobileMenuClose}
+                >
+                  <SendOutlined
+                    sx={{ mr: 1.5, fontSize: 20, opacity: 0.7 }}
+                  />
+                  Мои отклики
                 </MenuItem>
               </>
             )}

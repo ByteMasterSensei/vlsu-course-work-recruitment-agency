@@ -69,3 +69,8 @@ public class VacancyListResponseDto
     public int TotalPages { get; set; }
 }
 
+
+
+
+
+

@@ -20,9 +20,10 @@ import { managerService } from '../services/managerService';
 import { authService } from '../services/authService';
 
 const statusLabels: Record<string, string> = {
-  'Active': 'Активен',
-  'Archive': 'В архиве',
-  'NotLooking': 'Не ищу работу',
+  'Активна': 'Активен',
+  'Архивная': 'В архиве',
+  'Черновик': 'Черновик',
+  'Отправлена': 'Отправлена',
 };
 
 const ApplicantsPage = () => {
@@ -221,8 +222,8 @@ const ApplicantsPage = () => {
                             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                             fontSize: '0.75rem',
                             fontWeight: 600,
-                            bgcolor: profile.status === 'Active' ? 'success.light' : 'rgba(0, 0, 0, 0.06)',
-                            color: profile.status === 'Active' ? 'success.dark' : 'text.primary',
+                            bgcolor: profile.status === 'Активна' ? 'success.light' : 'rgba(0, 0, 0, 0.06)',
+                            color: profile.status === 'Активна' ? 'success.dark' : 'text.primary',
                             borderRadius: 0,
                           }}
                         />

@@ -21,10 +21,9 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import { vacancyService } from '../services/vacancyService';
 
 const statusLabels: Record<string, string> = {
-  'Active': 'Активна',
-  'Closed': 'Закрыта',
-  'Paused': 'На паузе',
-  'Draft': 'Черновик',
+  'Активна': 'Активна',
+  'Закрыта': 'Закрыта',
+  'На паузе': 'На паузе',
 };
 
 const employmentTypeLabels: Record<string, string> = {
@@ -187,8 +186,8 @@ const ManageVacanciesPage = () => {
                             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                             fontSize: '0.75rem',
                             fontWeight: 600,
-                            bgcolor: vacancy.status === 'Active' ? 'success.light' : 'rgba(0, 0, 0, 0.06)',
-                            color: vacancy.status === 'Active' ? 'success.dark' : 'text.primary',
+                            bgcolor: vacancy.status === 'Активна' ? 'success.light' : 'rgba(0, 0, 0, 0.06)',
+                            color: vacancy.status === 'Активна' ? 'success.dark' : 'text.primary',
                             borderRadius: 0,
                           }}
                         />

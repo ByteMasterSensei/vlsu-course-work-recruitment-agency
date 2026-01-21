@@ -23,9 +23,10 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import { applicantProfileService, type CreateApplicantProfile } from '../services/applicantProfileService';
 
 const statusOptions = [
-  { value: 0, label: 'Активен' },
-  { value: 1, label: 'В архиве' },
-  { value: 2, label: 'Не ищу работу' },
+  { value: 0, label: 'Черновик' },
+  { value: 1, label: 'Активна' },
+  { value: 2, label: 'Отправлена' },
+  { value: 3, label: 'Архивная' },
 ];
 
 const EditProfilePage = () => {
@@ -53,7 +54,14 @@ const EditProfilePage = () => {
 
   useEffect(() => {
     if (profile) {
-      const statusValue = profile.status === 'Active' ? 0 : profile.status === 'Archive' ? 1 : 2;
+      // Маппинг русских названий статусов на числовые значения
+      const statusMap: Record<string, number> = {
+        'Черновик': 0,
+        'Активна': 1,
+        'Отправлена': 2,
+        'Архивная': 3,
+      };
+      const statusValue = statusMap[profile.status] ?? 0;
       setFormData({
         desiredPosition: profile.desiredPosition || '',
         desiredSalary: profile.desiredSalary || '',
@@ -416,5 +424,10 @@ const EditProfilePage = () => {
 };
 
 export default EditProfilePage;
+
+
+
+
+
 
 

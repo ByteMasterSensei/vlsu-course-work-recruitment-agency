@@ -1,0 +1,649 @@
+{
+  "info": {
+    "_postman_id": "recruitment-agency-api",
+    "name": "Recruitment Agency API",
+    "description": "Полная коллекция API для системы рекрутингового агентства",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:80",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Аутентификация",
+      "item": [
+        {
+          "name": "Регистрация",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Иван\",\n  \"lastName\": \"Иванов\",\n  \"middleName\": \"Петрович\",\n  \"phone\": \"+7 (999) 123-45-67\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Вход",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@agency.ru\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Обновление токена",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Вакансии",
+      "item": [
+        {
+          "name": "Получить список вакансий",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vacancies?page=1&pageSize=10&search=&companyName=&employmentType=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vacancies"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "companyName",
+                  "value": ""
+                },
+                {
+                  "key": "employmentType",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Получить вакансию по ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vacancies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vacancies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Создать вакансию",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Разработчик C#\",\n  \"companyName\": \"ООО Технологии\",\n  \"companyINN\": \"1234567890\",\n  \"description\": \"Ищем опытного разработчика C# для работы над интересными проектами\",\n  \"requirements\": \"Опыт работы от 3 лет, знание .NET, Entity Framework\",\n  \"workingConditions\": \"Удаленная работа, гибкий график\",\n  \"salaryRange\": \"150000-250000 руб\",\n  \"employmentType\": 0,\n  \"contactPerson\": \"Иван Иванов\",\n  \"contactEmail\": \"hr@company.ru\",\n  \"contactPhone\": \"+7 (999) 123-45-67\",\n  \"expiresAt\": \"2024-12-31T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/vacancies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vacancies"]
+            }
+          }
+        },
+        {
+          "name": "Обновить вакансию",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior разработчик C#\",\n  \"salaryRange\": \"200000-300000 руб\",\n  \"status\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/vacancies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vacancies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Удалить вакансию",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vacancies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vacancies", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Избранные вакансии",
+      "item": [
+        {
+          "name": "Получить избранные вакансии",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/favorite-vacancies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "favorite-vacancies"]
+            }
+          }
+        },
+        {
+          "name": "Добавить в избранное",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/favorite-vacancies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "favorite-vacancies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Удалить из избранного",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/favorite-vacancies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "favorite-vacancies", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Профили соискателей",
+      "item": [
+        {
+          "name": "Получить мои профили",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles", "my"]
+            }
+          }
+        },
+        {
+          "name": "Получить все профили",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles"]
+            }
+          }
+        },
+        {
+          "name": "Получить профиль по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Создать профиль",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"desiredPosition\": \"Разработчик C#\",\n  \"desiredSalary\": \"150000-200000 руб\",\n  \"additionalInfo\": \"Ищу интересную работу в сфере разработки\",\n  \"readyToRelocate\": false,\n  \"readyForBusinessTrips\": true,\n  \"educations\": [\n    {\n      \"institution\": \"МГУ\",\n      \"specialty\": \"Прикладная математика\",\n      \"degree\": \"Бакалавр\",\n      \"graduationYear\": 2020\n    }\n  ],\n  \"workExperiences\": [\n    {\n      \"companyName\": \"ООО Технологии\",\n      \"position\": \"Junior разработчик\",\n      \"responsibilities\": \"Разработка веб-приложений\",\n      \"startDate\": \"2020-06-01T00:00:00Z\",\n      \"endDate\": \"2022-12-31T23:59:59Z\",\n      \"isCurrentJob\": false\n    }\n  ],\n  \"skills\": [\n    {\n      \"skillName\": \"C#\",\n      \"skillLevel\": \"Продвинутый\"\n    },\n    {\n      \"skillName\": \"ASP.NET Core\",\n      \"skillLevel\": \"Средний\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles"]
+            }
+          }
+        },
+        {
+          "name": "Обновить профиль",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"desiredPosition\": \"Senior разработчик C#\",\n  \"desiredSalary\": \"200000-250000 руб\",\n  \"status\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Удалить профиль",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Обновить статус профиля",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applicant-profiles/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applicant-profiles", "1", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Подбор персонала",
+      "item": [
+        {
+          "name": "Поиск персонала",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"desiredPosition\": \"Разработчик C#\",\n  \"education\": \"Высшее техническое\",\n  \"minExperienceYears\": 3,\n  \"requiredSkills\": [\"C#\", \"ASP.NET Core\", \"Entity Framework\"],\n  \"salaryRange\": \"150000-200000\",\n  \"readyToRelocate\": false,\n  \"vacancyId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/personnel-selection/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "personnel-selection", "search"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Права доступа",
+      "item": [
+        {
+          "name": "Получить все права доступа",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/access-rights",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "access-rights"]
+            }
+          }
+        },
+        {
+          "name": "Выдать право доступа",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2,\n  \"accessType\": 1,\n  \"daysValid\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/access-rights",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "access-rights"]
+            }
+          }
+        },
+        {
+          "name": "Отозвать право доступа",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/access-rights/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "access-rights", "1"]
+            }
+          }
+        },
+        {
+          "name": "Проверить право доступа",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/access-rights/check",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "access-rights", "check"]
+            }
+          }
+        },
+        {
+          "name": "Получить соискателей для выдачи прав",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/access-rights/applicants",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "access-rights", "applicants"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Управление пользователями (Админ)",
+      "item": [
+        {
+          "name": "Получить всех пользователей",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Получить пользователя по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Обновить пользователя",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Иван\",\n  \"lastName\": \"Иванов\",\n  \"middleName\": \"Петрович\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"role\": 1,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Удалить пользователя",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Журнал действий (Админ)",
+      "item": [
+        {
+          "name": "Получить журнал действий",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/action-logs?page=1&pageSize=50&userId=&actionType=&entityType=&startDate=&endDate=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "action-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                },
+                {
+                  "key": "userId",
+                  "value": ""
+                },
+                {
+                  "key": "actionType",
+                  "value": ""
+                },
+                {
+                  "key": "entityType",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Получить журнал действий пользователя",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/action-logs/user/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "action-logs", "user", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

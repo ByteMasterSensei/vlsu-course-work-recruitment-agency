@@ -21,7 +21,7 @@ public class PersonnelSelectionService : IPersonnelSelectionService
             .Include(ap => ap.Educations)
             .Include(ap => ap.WorkExperiences)
             .Include(ap => ap.Skills)
-            .Where(ap => ap.Status == ApplicantStatus.Active)
+            .Where(ap => ap.Status == ApplicantStatus.Active || ap.Status == ApplicantStatus.Submitted)
             .AsQueryable();
         if (searchDto.VacancyId.HasValue)
         {

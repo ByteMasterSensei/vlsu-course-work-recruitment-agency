@@ -84,3 +84,8 @@ public class UpdateApplicantProfileDto
     public List<CreateApplicantSkillDto>? Skills { get; set; }
 }
 
+
+
+
+
+

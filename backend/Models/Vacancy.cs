@@ -54,5 +54,11 @@ public class Vacancy
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public virtual ICollection<FavoriteVacancy> FavoriteVacancies { get; set; } = new List<FavoriteVacancy>();
+    public virtual ICollection<VacancyApplication> VacancyApplications { get; set; } = new List<VacancyApplication>();
 }
+
+
+
+
+
 
